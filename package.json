@@ -1,0 +1,55 @@
+{
+  "name": "jam-backend",
+  "version": "1.0.0",
+  "description": "Backend do sistema JAM",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "NODE_ENV=dev tsx --watch src/index.ts",
+    "production": "NODE_ENV=production tsx --watch src/index.ts",
+
+    "postgres-install": "sudo docker pull postgres && sudo docker tag postgres:latest jam-postgres:latest && sudo docker rmi postgres:latest",
+    "postgres-volume": "sudo docker volume create jam_volume",
+    "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=jam-admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
+    "postgres-restart": "sudo docker restart jam-postgres",
+    "postgres-purge": "sudo docker stop jam-postgres && sudo docker rm jam-postgres",
+    
+    "db-push": "NODE_ENV=dev npx drizzle-kit push",
+    "db-generate": "NODE_ENV=dev npx drizzle-kit generate",
+    "db-migrate": "NODE_ENV=dev npx drizzle-kit migrate",
+    "db-push-production": "NODE_ENV=production npx drizzle-kit push",
+    "db-generate-production": "NODE_ENV=production npx drizzle-kit generate",
+    "db-migrate-production": "NODE_ENV=production npx drizzle-kit migrate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricLows/JAM-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EricLows/JAM-backend/issues"
+  },
+  "homepage": "https://github.com/EricLows/JAM-backend#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^1.0.0-rc.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "@types/pg": "^8.20.0",
+    "cross-env": "^10.1.0",
+    "drizzle-kit": "^1.0.0-rc.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  },
+  "type": "module"
+}
