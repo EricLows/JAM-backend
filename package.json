@@ -6,21 +6,15 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "NODE_ENV=dev tsx --watch src/index.ts",
-    "production": "NODE_ENV=production tsx --watch src/index.ts",
-
+    "start": "tsx --watch src/index.ts",
     "postgres-install": "sudo docker pull postgres && sudo docker tag postgres:latest jam-postgres:latest && sudo docker rmi postgres:latest",
     "postgres-volume": "sudo docker volume create jam_volume",
     "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=jam-admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
     "postgres-restart": "sudo docker restart jam-postgres",
     "postgres-purge": "sudo docker stop jam-postgres && sudo docker rm jam-postgres",
-    
-    "db-push": "NODE_ENV=dev npx drizzle-kit push",
-    "db-generate": "NODE_ENV=dev npx drizzle-kit generate",
-    "db-migrate": "NODE_ENV=dev npx drizzle-kit migrate",
-    "db-push-production": "NODE_ENV=production npx drizzle-kit push",
-    "db-generate-production": "NODE_ENV=production npx drizzle-kit generate",
-    "db-migrate-production": "NODE_ENV=production npx drizzle-kit migrate"
+    "db-push": "npx drizzle-kit push",
+    "db-generate": "npx drizzle-kit generate",
+    "db-migrate": "npx drizzle-kit migrate"
   },
   "repository": {
     "type": "git",
@@ -34,6 +28,7 @@
   },
   "homepage": "https://github.com/EricLows/JAM-backend#readme",
   "dependencies": {
+    "crypto-ts": "^1.0.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
     "express": "^5.2.1",

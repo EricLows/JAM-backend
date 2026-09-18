@@ -3,6 +3,7 @@ import { LoginService } from "@/services/loginService";
 import { RequestErrorTypes } from "@/lib/consts";
 
 class LoginController {
+
     async login(
         req: Request,
         res: Response,
@@ -17,25 +18,15 @@ class LoginController {
 
             const base64Credentials = authHeader.split(' ')[1];
             const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-            const [username, password] = credentials.split(':');
+            const [email, password] = credentials.split(':');
 
-            if (username != 'admin') {
-                return res.status(401).json({
-                    message: 'Conta não existe'
-                });                
-            }
-
-            if (password != '123') {
-                return res.status(401).json({
-                    message: 'Senha inválida'
-                });
-            }
+            const user = await LoginService.login(email, password);
 
             return res.status(200).json({
                 token: 'Sucesso',
             });
-        } catch (err: any) {
-            next(err);
+        } catch (e) {
+            next(e);
         }
     }
 
@@ -79,8 +70,8 @@ class LoginController {
             res.status(200).json({
                 id
             });
-        } catch (err: any) {
-            next(err);
+        } catch (e) {
+            next(e);
         }
     }
 }
