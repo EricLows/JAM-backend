@@ -1,6 +1,7 @@
 import { User, usersTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "..";
+import { JamError } from "@/lib/error";
 
 const LoginService = {
   /*
@@ -13,11 +14,13 @@ const LoginService = {
     const [result] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
 
     if (!result) {
-      throw 'E-mail não existe';
+      throw new JamError(403, 'E-mail não existe', 'email');
     }
 
+    console.log(`${result.password} e ${password}`);
+
     if (result.password != password) {
-      throw 'Senha incorreta';
+      throw new JamError(403, 'Senha incorreta', 'password');
     }
 
     return result;
@@ -46,7 +49,7 @@ const LoginService = {
     avatar?: string,
   ): Promise<number> {
     if (await this.emailExists(email)) {
-      throw 'E-mail já existe';
+      throw new JamError(403, 'E-mail já existe', 'email');
     }
 
     const [result] = await db

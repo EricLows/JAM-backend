@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { LoginService } from "@/services/loginService";
 import { RequestErrorTypes } from "@/lib/consts";
+import jwt from 'jsonwebtoken';
 
 class LoginController {
 
@@ -11,6 +12,7 @@ class LoginController {
     ) {
         try {
             const authHeader = req.headers.authorization;
+            const jwtKey = process.env.JWT_KEY;
 
             if (!authHeader || !authHeader.startsWith('Basic ')) {
                 return res.status(401).json({ message: 'Autenticação inválida' });
@@ -21,9 +23,15 @@ class LoginController {
             const [email, password] = credentials.split(':');
 
             const user = await LoginService.login(email, password);
+            const token = jwt.sign({ 
+                id: user.id,
+                username: user.username,
+                email: user.email,
+             }, jwtKey);
 
             return res.status(200).json({
-                token: 'Sucesso',
+                token,
+                avatar: user.avatar,
             });
         } catch (e) {
             next(e);

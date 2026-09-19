@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/EricLows/JAM-backend#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "crypto-ts": "^1.0.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
