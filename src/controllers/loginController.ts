@@ -31,6 +31,7 @@ class LoginController {
 
             return res.status(200).json({
                 token,
+                userName: user.username,
                 avatar: user.avatar,
             });
         } catch (e) {

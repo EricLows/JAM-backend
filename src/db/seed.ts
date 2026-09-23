@@ -8,7 +8,7 @@ export async function seed() {
   const username = process.env.DEFAULT_ACCOUNT_NAME ?? "JAM admin";
   const email = process.env.DEFAULT_ACCOUNT_EMAIL ?? "jam.10.scb@gmail.com";
   const password = process.env.DEFAULT_ACCOUNT_PASSWORD ?? "123456789";
-
+  
   const user = await db
     .select()
     .from(usersTable)
@@ -19,7 +19,7 @@ export async function seed() {
       username,
       email,
       password,
-      avatar: null,
+      avatar: './src/assets/images/JAM.png',
     });
 
     console.log("Seed gerada!!");

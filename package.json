@@ -9,7 +9,7 @@
     "start": "tsx --watch src/index.ts",
     "postgres-install": "sudo docker pull postgres && sudo docker tag postgres:latest jam-postgres:latest && sudo docker rmi postgres:latest",
     "postgres-volume": "sudo docker volume create jam_volume",
-    "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=jam-admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
+    "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
     "postgres-restart": "sudo docker restart jam-postgres",
     "postgres-purge": "sudo docker stop jam-postgres && sudo docker rm jam-postgres",
     "db-push": "npx drizzle-kit push",

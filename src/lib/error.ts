@@ -41,7 +41,6 @@ export const handleError = (
   }
 
   res.status(statusCode).json({
-    statusCode,
     message,
     field,
     metadata,
