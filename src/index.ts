@@ -2,10 +2,12 @@ import dotenv from "dotenv";
 import express from "express";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { seed } from "./db/seed.ts";
-import loginRouter from "./routes/loginRoutes.ts";
 import { handleError } from "./lib/error.ts";
 import { setCypherKey } from "./db/schema.ts";
 import cors from "cors";
+
+import loginRouter from "./routes/loginRoutes.ts";
+import logRouter from "./routes/logRoutes.ts";
 
 const result = dotenv.config();
 
@@ -29,6 +31,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/login", loginRouter);
+app.use("/log", logRouter);
 
 app.use(handleError);
 

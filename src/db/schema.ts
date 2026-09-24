@@ -1,4 +1,4 @@
-import { integer, pgTable, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 import { AES, enc } from "crypto-ts";
 import { InferSelectModel } from "drizzle-orm";
@@ -29,6 +29,17 @@ const encryptedText = customType<{
     return aesKey ? AES.decrypt(value, aesKey).toString(enc.Utf8) : value;
   },
 });
+
+/*
+ * Logs
+ */
+
+export const logsTable = pgTable("logs", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  logType: text().notNull(),
+  message: text().notNull(),
+  dateTime: timestamp('created_at', { mode: 'date' }).defaultNow(), 
+})
 
 /*
  * Usuários

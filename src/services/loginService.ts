@@ -17,8 +17,6 @@ const LoginService = {
       throw new JamError(403, 'E-mail não existe', 'email');
     }
 
-    console.log(`${result.password} e ${password}`);
-
     if (result.password != password) {
       throw new JamError(403, 'Senha incorreta', 'password');
     }
