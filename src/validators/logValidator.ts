@@ -3,13 +3,13 @@ import { z } from "zod/v3";
 
 export const LogValidator = {
   getLogs: z.object({
-    params: z.object({
+    query: z.object({
       page: z.coerce
         .number({
           errorMap: zodErrorMap,
         })
         .optional()
-        .default(0),
+        .default(1),
       pageSize: z.coerce
         .number({
           errorMap: zodErrorMap,

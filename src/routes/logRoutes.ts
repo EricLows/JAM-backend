@@ -1,7 +1,8 @@
-import { validate, validateToken } from "@/lib/validator.ts";
+import { validate } from "@/lib/validator.ts";
 import { LogController } from "../controllers/logController.ts";
 import { Router } from "express";
 import { LogValidator } from "@/validators/logValidator.ts";
+import { validateToken } from "@/lib/token.ts";
 
 const logController = new LogController();
 

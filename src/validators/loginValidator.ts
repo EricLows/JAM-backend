@@ -6,7 +6,7 @@ export const LoginValidator = {
     body: z.object({
       username: z.string({
         errorMap: zodErrorMap,
-      }).min(1),
+      }).min(1, "Informe o nome de usuário"),
       email: z.string({
         errorMap: zodErrorMap,
       }).email(),

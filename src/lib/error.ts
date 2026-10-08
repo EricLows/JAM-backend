@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { JamResponse } from "./validator";
 
 export class JamError extends Error {
   public statusCode: number;
@@ -40,9 +41,11 @@ export const handleError = (
     metadata = err.stack ?? "";
   }
 
-  res.status(statusCode).json({
-    message,
-    field,
-    metadata,
-  });
+  res.status(statusCode).json(
+    new JamResponse({
+      message,
+      field,
+      metadata,
+    }),
+  );
 };
