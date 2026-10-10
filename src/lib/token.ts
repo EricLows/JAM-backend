@@ -37,7 +37,7 @@ export async function validateToken(
       throw "Usuário não encontrado";
     }
   } catch (e) {
-    res.status(401).send(new JamResponse({ message: "Token inválido" }));
+    res.status(401).send(new JamResponse({ message: "Faça login para acessar esse recurso" }));
   }
 
   next();
