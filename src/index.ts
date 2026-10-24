@@ -8,6 +8,7 @@ import cors from "cors";
 
 import loginRouter from "./routes/loginRoutes.ts";
 import logRouter from "./routes/logRoutes.ts";
+import suggestionRouter from "./routes/suggestionRoutes.ts";
 
 const result = dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use("/suggestion", suggestionRouter);
 app.use("/login", loginRouter);
 app.use("/log", logRouter);
 

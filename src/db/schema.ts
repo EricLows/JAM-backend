@@ -39,7 +39,22 @@ export const logsTable = pgTable("logs", {
   logType: text().notNull(),
   message: text().notNull(),
   dateTime: timestamp('created_at', { mode: 'date' }).defaultNow(), 
-})
+});
+
+export type Logs = InferSelectModel<typeof logsTable>;
+
+/*
+ * Sugestões
+ */
+
+export const suggestionTable = pgTable("suggestions", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: text(),
+  message: text().notNull(),
+  dateTime: timestamp('created_at', { mode: 'date' }).defaultNow(), 
+});
+
+export type Suggestion = InferSelectModel<typeof suggestionTable>;
 
 /*
  * Usuários
