@@ -87,7 +87,7 @@ export const meetingTable = pgTable("meeting", {
   responsible: text().notNull(),
   date: date({ mode: "date" }),
   pdf: text(),
-  likes: integer().default(0)
+  likes: integer().default(0),
 });
 
 /*
@@ -98,43 +98,17 @@ export const photoTable = pgTable("photo", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
   date: date({ mode: "date" }),
-  link: text(),
-  meetingId: integer(),
+  link: text().notNull(),
+  meetingId: integer().references(() => meetingTable.id),
 });
 
-export const relations = defineRelations({ meetingTable, photoTable }, (r) => ({
-  photoTable: {
-    meetingTable: r.one.meetingTable({
-      from: r.photoTable.meetingId,
-      to: r.meetingTable.id,
-    }),
-  },
-}));
-
 /*
- * Tag de Foto/Encontro
+ * Tag de Encontro
  */
 export const tagTable = pgTable("tag", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
 });
-
-export const tagToPhoto = pgTable(
-  "tagToPhoto",
-  {
-    photoId: integer()
-      .notNull()
-      .references(() => photoTable.id),
-    tagId: integer()
-      .notNull()
-      .references(() => tagTable.id),
-  },
-  (t) => [
-    primaryKey({
-      columns: [t.photoId, t.tagId],
-    }),
-  ],
-);
 
 export const tagToMeeting = pgTable(
   "tagToMeeting",
@@ -151,6 +125,31 @@ export const tagToMeeting = pgTable(
       columns: [t.meetingId, t.tagId],
     }),
   ],
+);
+
+/*
+ * Relações
+ */
+export const relations = defineRelations(
+  { meetingTable, photoTable, tagTable, tagToMeeting },
+  (r) => ({
+    photoTable: {
+      meeting: r.one.meetingTable({
+        from: r.photoTable.meetingId,
+        to: r.meetingTable.id,
+      }),
+    },
+    meetingTable: {
+      photos: r.many.photoTable(),
+      tags: r.many.tagTable({
+        from: r.meetingTable.id.through(r.tagToMeeting.meetingId),
+        to: r.tagTable.id.through(r.tagToMeeting.tagId),
+      }),
+    },
+    tagTable: {
+      meetings: r.many.meetingTable(),
+    },
+  }),
 );
 
 export type User = InferSelectModel<typeof usersTable>;

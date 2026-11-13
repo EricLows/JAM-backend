@@ -6,4 +6,13 @@ export type Meeting = {
   responsible: string,
   date: Date | null,
   pdf: string | null,
+  photos: {
+    id: number,
+    link: string,
+    name: string,
+  }[],
+  tags: {
+    id: number,
+    name: string,
+  }[]
 };

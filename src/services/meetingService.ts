@@ -1,9 +1,8 @@
 import { meetingTable, photoTable, tagToMeeting } from "@/db/schema";
 import { db } from "..";
-import { desc } from "drizzle-orm";
 import { Meeting } from "@/types/meeting";
 import { ReqFile } from "@/types/file";
-import { deleteFile, FileStorage, uploadFile } from "@/lib/storage";
+import { deleteFile, FileStorage, getFileUrl, uploadFile } from "@/lib/storage";
 
 const MeetingService = {
   /*
@@ -17,16 +16,16 @@ const MeetingService = {
     pdf,
     coverPhoto,
     photos,
-    tags
+    tags,
   }: {
-    date: Date,
-    description: string,
-    responsible: string,
-    title: string,
-    pdf: ReqFile | undefined,
-    coverPhoto:ReqFile,
-    photos: ReqFile[],
-    tags: number[],
+    date: Date;
+    description: string;
+    responsible: string;
+    title: string;
+    pdf: ReqFile | undefined;
+    coverPhoto: ReqFile;
+    photos: ReqFile[];
+    tags: number[];
   }): Promise<number> {
     const filesKeys: string[] = [];
 
@@ -34,22 +33,40 @@ const MeetingService = {
       let pdfStorage: FileStorage | undefined;
       const photosStorage: FileStorage[] = [];
 
-      const coverPhotoStorage: FileStorage = await uploadFile(coverPhoto);
+      const coverPhotoStorage: FileStorage = await uploadFile(
+        'meeting-cover-photo',
+        {
+          reqFile: coverPhoto,
+          rename: `${title}.jpg`,
+        }
+      );
       filesKeys.push(coverPhotoStorage.key);
 
       if (pdf) {
-        pdfStorage = await uploadFile(pdf);
+        pdfStorage = await uploadFile(
+          'meeting-files',
+          {
+            reqFile: pdf,
+            rename: `${title}.pdf`,
+          }
+        );
         filesKeys.push(pdfStorage.key);
       }
 
-      for (const photo of photos) {
-        const photoStorage = await uploadFile(photo);
+      for (const [index, photo] of photos.entries()) {
+        const photoStorage = await uploadFile(
+          'gallery',
+          {
+            reqFile: photo,
+            rename: `${title} - foto ${index}.jpg`,
+          }
+        );
         photosStorage.push(photoStorage);
         filesKeys.push(photoStorage.key);
       }
 
       const result = await db.transaction(async (tx) => {
-        const [meeting] = await db
+        const [meeting] = await tx
           .insert(meetingTable)
           .values({
             date,
@@ -66,7 +83,7 @@ const MeetingService = {
             tags.map((tag) => ({
               meetingId: meeting.id,
               tagId: tag,
-            }))
+            })),
           );
         }
 
@@ -77,7 +94,7 @@ const MeetingService = {
               name: photo.fileName,
               date,
               link: photo.key,
-            }))
+            })),
           );
         }
 
@@ -85,8 +102,7 @@ const MeetingService = {
       });
 
       return result.id;
-    }
-    catch(e) {
+    } catch (e) {
       for (const key of filesKeys) {
         await deleteFile(key);
       }
@@ -101,13 +117,49 @@ const MeetingService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<Meeting[]> {
-    const results = await db
-      .select()
-      .from(meetingTable)
-      .orderBy(desc(meetingTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize);
-    return results;
+
+    const meetings = await db.query.meetingTable.findMany({
+      columns: {
+        id: true,
+        title: true,
+        description: true,
+        date: true,
+        coverPhoto: true,
+        likes: true,
+        pdf: true,
+        responsible: true,
+      },
+      with: {
+        photos: {
+          columns: {
+            id: true,
+            link: true,
+            name: true,
+          },
+        },
+        tags: true,
+      },
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+    });
+
+    if (meetings.length === 0) {
+      return [];
+    }
+
+    return meetings.map(
+      (meeting): Meeting => ({
+        id: meeting.id,
+        title: meeting.title,
+        description: meeting.description,
+        responsible: meeting.responsible,
+        coverPhoto: getFileUrl(meeting.coverPhoto),
+        date: meeting.date,
+        pdf: meeting.pdf ? getFileUrl(meeting.pdf) : null,
+        photos: meeting.photos,
+        tags: meeting.tags,
+      }),
+    );
   },
 };
 

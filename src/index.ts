@@ -3,7 +3,7 @@ import express from "express";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { seed } from "./db/seed.ts";
 import { handleError } from "./lib/error.ts";
-import { setCypherKey } from "./db/schema.ts";
+import { relations, setCypherKey } from "./db/schema.ts";
 import cors from "cors";
 
 import loginRouter from "./routes/loginRoutes.ts";
@@ -19,7 +19,7 @@ if (result.error) {
   process.exit(0);
 }
 
-export const db = drizzle(process.env.DATABASE_URL!);
+export const db = drizzle(process.env.DATABASE_URL!, { relations });
 
 setCypherKey(process.env.AES_CYPHER_KEY);
 seed();

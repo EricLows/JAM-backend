@@ -3,8 +3,6 @@ import { defineConfig } from 'drizzle-kit';
 
 dotenv.config();
 
-console.dir(`AQUI: '${process.env.DATABASE_URL}'`);
-
 export default defineConfig({
   out: './drizzle',
   schema: './src/db/schema.ts',
