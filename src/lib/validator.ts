@@ -1,3 +1,4 @@
+import multer from 'multer';
 import z, { AnyZodObject } from "zod/v3";
 import { RequestErrorTypes } from "./consts";
 import type { Request, Response } from "express";
@@ -96,3 +97,21 @@ export function validate(schema: AnyZodObject) {
     next();
   };
 }
+
+ /*
+  * Multer, usado para validar envio de arquivos
+  */
+export const multerUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }, // Limite de 100MB por arquivo
+});
+
+ /*
+  * Validador de arquivos do multer
+  */
+export const fileValidationSchema = z.object({
+  fieldname: z.string(),
+  originalname: z.string(),
+  mimetype: z.string(),
+  size: z.number(),
+});

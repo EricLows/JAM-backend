@@ -28,23 +28,28 @@
   },
   "homepage": "https://github.com/EricLows/JAM-backend#readme",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1165.0",
+    "@aws-sdk/s3-request-presigner": "^3.1165.0",
     "cors": "^2.8.6",
     "crypto-ts": "^1.0.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
     "express": "^5.2.1",
+    "googleapis": "^188.0.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.5.0",
     "pg": "^8.22.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "@types/node": "^26.1.2",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
     "@types/pg": "^8.20.0",
     "cross-env": "^10.1.0",
     "drizzle-kit": "^1.0.0-rc.4",
     "ts-node": "^10.9.2",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "type": "module"
