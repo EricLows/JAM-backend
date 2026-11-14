@@ -31,5 +31,14 @@ export const MeetingValidator = {
         .optional()
         .default(50),
     })
+  }),
+
+  getMeeting: z.object({
+    params: z.strictObject({
+      id: z.coerce
+        .number({
+          errorMap: zodErrorMap,
+        }),
+      })
   })
 };

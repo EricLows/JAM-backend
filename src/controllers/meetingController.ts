@@ -85,6 +85,34 @@ class MeetingController {
       next(e);
     }
   }
+
+  /*
+  * Busca um determinado encontro
+  */
+  async getMeeting(
+    req: TypedRequest<typeof MeetingValidator.getMeeting>,
+    res: Response,
+    next: NextFunction,
+  ): ControllerResponse<Meeting[]> {
+    try {
+      const { id } = req.params;
+      const meeting = await MeetingService.getMeeting(
+        Number(id),
+      );
+
+      if (!meeting) {
+        return res.sendStatus(404);
+      }
+
+      return res.status(200).json(
+        new JamResponse({
+          data: meeting,
+        }),
+      );
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export { MeetingController };

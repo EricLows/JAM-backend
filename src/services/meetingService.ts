@@ -1,6 +1,6 @@
 import { meetingTable, photoTable, tagToMeeting } from "@/db/schema";
 import { db } from "..";
-import { Meeting } from "@/types/meeting";
+import { Meeting, MeetingSimple } from "@/types/meeting";
 import { ReqFile } from "@/types/file";
 import { deleteFile, FileStorage, getFileUrl, uploadFile } from "@/lib/storage";
 
@@ -34,33 +34,27 @@ const MeetingService = {
       const photosStorage: FileStorage[] = [];
 
       const coverPhotoStorage: FileStorage = await uploadFile(
-        'meeting-cover-photo',
+        "meeting-cover-photo",
         {
           reqFile: coverPhoto,
           rename: `${title}.jpg`,
-        }
+        },
       );
       filesKeys.push(coverPhotoStorage.key);
 
       if (pdf) {
-        pdfStorage = await uploadFile(
-          'meeting-files',
-          {
-            reqFile: pdf,
-            rename: `${title}.pdf`,
-          }
-        );
+        pdfStorage = await uploadFile("meeting-files", {
+          reqFile: pdf,
+          rename: `${title}.pdf`,
+        });
         filesKeys.push(pdfStorage.key);
       }
 
       for (const [index, photo] of photos.entries()) {
-        const photoStorage = await uploadFile(
-          'gallery',
-          {
-            reqFile: photo,
-            rename: `${title} - foto ${index}.jpg`,
-          }
-        );
+        const photoStorage = await uploadFile("gallery", {
+          reqFile: photo,
+          rename: `${title} - foto ${index}.jpg`,
+        });
         photosStorage.push(photoStorage);
         filesKeys.push(photoStorage.key);
       }
@@ -116,8 +110,7 @@ const MeetingService = {
   async getMeetings(
     page: number = 1,
     pageSize: number = 50,
-  ): Promise<Meeting[]> {
-
+  ): Promise<MeetingSimple[]> {
     const meetings = await db.query.meetingTable.findMany({
       columns: {
         id: true,
@@ -148,18 +141,67 @@ const MeetingService = {
     }
 
     return meetings.map(
-      (meeting): Meeting => ({
+      (meeting): MeetingSimple => ({
         id: meeting.id,
         title: meeting.title,
         description: meeting.description,
         responsible: meeting.responsible,
         coverPhoto: getFileUrl(meeting.coverPhoto),
         date: meeting.date,
-        pdf: meeting.pdf ? getFileUrl(meeting.pdf) : null,
-        photos: meeting.photos,
+        pdf: meeting.pdf ? true : false,
+        photos: meeting.photos.length,
         tags: meeting.tags,
       }),
     );
+  },
+
+  /*
+   * Busca um determinado encontro
+   */
+  async getMeeting(id: number): Promise<Meeting | undefined> {
+    const meeting = await db.query.meetingTable.findFirst({
+      columns: {
+        id: true,
+        title: true,
+        description: true,
+        date: true,
+        coverPhoto: true,
+        likes: true,
+        pdf: true,
+        responsible: true,
+      },
+      with: {
+        photos: {
+          columns: {
+            id: true,
+            link: true,
+            name: true,
+          },
+        },
+        tags: true,
+      },
+      where: {
+        id,
+      },
+    });
+
+    if (!meeting) return undefined;
+
+    return {
+      id: meeting.id,
+      title: meeting.title,
+      description: meeting.description,
+      responsible: meeting.responsible,
+      coverPhoto: getFileUrl(meeting.coverPhoto),
+      date: meeting.date,
+      pdf: meeting.pdf ? getFileUrl(meeting.pdf) : null,
+      photos: meeting.photos.map((photo) => ({
+        ...photo,
+        link: getFileUrl(photo.link),
+      })),
+      tags: meeting.tags,
+      likes: meeting.likes ?? 0,
+    };
   },
 };
 

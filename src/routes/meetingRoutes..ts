@@ -20,9 +20,15 @@ meetingRouter.post(
 );
 
 meetingRouter.get(
-  "/",
+  "/list",
   validate(MeetingValidator.getMeetings),
   meetingController.getMeetings as any,
+);
+
+meetingRouter.get(
+  "/:id",
+  validate(MeetingValidator.getMeeting),
+  meetingController.getMeeting as any,
 );
 
 export default meetingRouter;
