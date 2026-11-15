@@ -1,7 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "jam-api",
+  "name": "jam-backend",
   "main": "src/index.ts",
-  "compatibility_date": "2026-11-14",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_date": "2026-11-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true
 }
