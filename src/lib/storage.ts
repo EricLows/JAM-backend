@@ -7,7 +7,6 @@ import {
 } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import "dotenv/config";
-import sharp from "sharp";
 
 const DEFAULT_IMAGE_WIDTH = 1600;
 const DEFAULT_IMAGE_HEIGHT = 900;
@@ -131,6 +130,8 @@ export async function compressImage(
   input: Buffer,
   resize: boolean = false,
 ): Promise<Buffer> {
+  // TODO - Refazer compressor
+  /*
   let result = sharp(input);
 
   // Corrige orientação EXIF automaticamente
@@ -151,4 +152,7 @@ export async function compressImage(
   });
 
   return result.toBuffer();
+  */
+
+  return input;
 }

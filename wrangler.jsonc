@@ -5,5 +5,10 @@
   "compatibility_date": "2026-11-15",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
-  "preview_urls": true
+  "preview_urls": true,
+  "vars": {
+    "CORS_ORIGIN_URL": "https://jam-pscb.com.br",
+    "DEFAULT_ACCOUNT_EMAIL": "jam.10.scb@gmail.com",
+    "DEFAULT_ACCOUNT_NAME": "JAM admin"
+  }
 }
