@@ -1,48 +1,40 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Context } from "hono";
 import { TagService } from "@/services/tagService";
-import { TagValidator } from "@/validators/tagValidator";
-import { ControllerResponse, JamResponse, TypedRequest } from "@/lib/validator";
+import { ControllerResponse, JamResponse } from "@/lib/validator";
 import { Tag } from "@/types/tag";
 
 class TagController {
   /*
    * Registra uma tag de foto/encontro
    */
-  async postTag(
-    req: TypedRequest<typeof TagValidator.postTag>,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Tag[]> {
+  async postTag(c: Context): ControllerResponse<Tag[]> {
     try {
-      const { name } = req.body;
+      const { name } = await c.req.json().catch(() => ({ name: undefined }));
       const response = await TagService.postTag({
         name,
       });
 
-      return res.status(201).send({ id: response });
+      return c.json({ id: response }, 201);
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 
   /*
    * Busca uma lista de tags
    */
-  async getTags(
-    req: TypedRequest<typeof TagValidator.getTags>,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Tag[]> {
+  async getTags(c: Context): ControllerResponse<Tag[]> {
     try {
       const tags = await TagService.getTags();
 
-      return res.status(200).json(
+      return c.json(
         new JamResponse({
           data: tags,
         }),
+        200,
       );
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 }

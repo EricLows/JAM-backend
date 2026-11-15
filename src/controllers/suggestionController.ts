@@ -1,47 +1,39 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Context } from "hono";
 import { SuggestionService } from "@/services/suggestionService";
-import { SuggestionValidator } from "@/validators/suggestionValidator";
-import { ControllerResponse, JamResponse, TypedRequest } from "@/lib/validator";
+import { ControllerResponse, JamResponse } from "@/lib/validator";
 import { Suggestion } from "@/types/suggestion";
 
 class SuggestionController {
   /*
    * Registra uma sugestão
    */
-  async postSuggestion(
-    req: TypedRequest<typeof SuggestionValidator.postSuggestion>,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Suggestion[]> {
+  async postSuggestion(c: Context): ControllerResponse<Suggestion[]> {
     try {
-      const { name, message } = req.body;
+      const { name, message } = await c.req.json().catch(() => ({ name: undefined, message: undefined }));
       const response = await SuggestionService.postSuggestion(message, name);
 
-      return res.status(201).send({id: response});
+      return c.json({ id: response }, 201);
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 
   /*
    * Busca as sugestões registradas
    */
-  async getSuggestions(
-    req: TypedRequest<typeof SuggestionValidator.getSuggestions>,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Suggestion[]> {
+  async getSuggestions(c: Context): ControllerResponse<Suggestion[]> {
     try {
-      const { page, pageSize } = req.query;
+      const { page, pageSize } = c.req.query();
       const suggestions = await SuggestionService.getSuggestions(Number(page), Number(pageSize));
 
-      return res.status(200).json(
+      return c.json(
         new JamResponse({
           data: suggestions,
         }),
+        200,
       );
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 }

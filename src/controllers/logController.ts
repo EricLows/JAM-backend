@@ -1,29 +1,25 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Context } from "hono";
 import { LogService } from "@/services/logService";
-import { LogValidator } from "@/validators/logValidator.ts";
-import { ControllerResponse, JamResponse, TypedRequest } from "@/lib/validator";
+import { ControllerResponse, JamResponse } from "@/lib/validator";
 import { Log } from "@/types/log";
 
 class LogController {
   /*
    * Busca os logs registrados
    */
-  async getLogs(
-    req: TypedRequest<typeof LogValidator.getLogs>,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Log[]> {
+  async getLogs(c: Context): ControllerResponse<Log[]> {
     try {
-      const { page, pageSize } = req.query;
+      const { page, pageSize } = c.req.query();
       const logs = await LogService.getLogs(Number(page), Number(pageSize));
 
-      return res.status(200).json(
+      return c.json(
         new JamResponse({
           data: logs,
         }),
+        200,
       );
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 }

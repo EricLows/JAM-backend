@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Context } from "hono";
 import { JamResponse } from "./validator";
 
 export class JamError extends Error {
@@ -22,14 +22,9 @@ export class JamError extends Error {
 }
 
 /**
- * Tratador de erros customizado do Express
+ * Tratador de erros customizado do Hono
  */
-export const handleError = (
-  err: JamError,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const handleError = (err: JamError, c: Context) => {
   let { statusCode, message, field, metadata } = err;
 
   console.log(err.message);
@@ -41,11 +36,12 @@ export const handleError = (
     metadata = err.stack ?? "";
   }
 
-  res.status(statusCode).json(
+  return c.json(
     new JamResponse({
       message,
       field,
       metadata,
     }),
+    statusCode as any,
   );
 };

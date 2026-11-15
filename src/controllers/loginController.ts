@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Context } from "hono";
 import { LoginService } from "@/services/loginService";
 import { LogService } from "@/services/logService";
 import { createValidToken } from "@/lib/token";
@@ -9,41 +9,35 @@ class LoginController {
   /*
    * Acessa uma conta, caso ela exista
    */
-  async login(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<User> {
+  async login(c: Context): ControllerResponse<User> {
     try {
-      const authHeader = req.headers.authorization;
+      const authHeader = c.req.header("Authorization");
 
       if (!authHeader || !authHeader.startsWith("Basic ")) {
-        return res
-          .status(401)
-          .json(new JamResponse({ message: "Autenticação inválida" }));
+        return c.json(new JamResponse({ message: "Autenticação inválida" }), 401);
       }
 
       const base64Credentials = authHeader.split(" ")[1];
-      const credentials = Buffer.from(base64Credentials, "base64").toString(
-        "utf-8",
-      );
+      const credentials = Buffer.from(base64Credentials, "base64").toString("utf-8");
       const [email, password] = credentials.split(":");
 
-      if(!email?.length) {
-        return res.status(403).json(
+      if (!email?.length) {
+        return c.json(
           new JamResponse<User>({
             message: "Informe um e-mail",
             field: "email",
           }),
+          403,
         );
       }
 
-      if(!password?.length) {
-        return res.status(403).json(
+      if (!password?.length) {
+        return c.json(
           new JamResponse<User>({
             message: "Informe sua senha",
             field: "password",
           }),
+          403,
         );
       }
 
@@ -54,12 +48,9 @@ class LoginController {
         email: user.email,
       });
 
-      await LogService.log(
-        "Usuário",
-        `"${user.username}" entrou na sua conta.`,
-      );
+      await LogService.log("Usuário", `"${user.username}" entrou na sua conta.`);
 
-      return res.status(200).json(
+      return c.json(
         new JamResponse<User>({
           data: {
             token,
@@ -67,9 +58,10 @@ class LoginController {
             avatar: user.avatar,
           },
         }),
+        200,
       );
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 
@@ -77,42 +69,42 @@ class LoginController {
    * Registra uma conta com um determinado e-mail, nome de usuário,
    * senha e foto de perfil
    */
-  async register(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): ControllerResponse<Number> {
+  async register(c: Context): ControllerResponse<Number> {
     try {
-      const { username, email, password, passwordConfirm } = req.body;
+      const body = await c.req.json().catch(() => ({}));
+      const { username, email, password, passwordConfirm } = body;
 
       const emailExists = await LoginService.emailExists(email);
       if (emailExists) {
-        return res.status(401).json(
+        return c.json(
           new JamResponse({
             field: "email",
             message: "E-mail já cadastrado",
           }),
+          401,
         );
       }
 
       if (password != passwordConfirm) {
-        return res.status(401).json(
+        return c.json(
           new JamResponse({
             field: "passwordConfirm",
             message: "Confirme sua senha corretamente",
           }),
+          401,
         );
       }
 
       const id = await LoginService.register(username, email, password);
 
-      return res.status(200).json(
+      return c.json(
         new JamResponse({
           data: id,
         }),
+        200,
       );
     } catch (e) {
-      next(e);
+      throw e;
     }
   }
 }

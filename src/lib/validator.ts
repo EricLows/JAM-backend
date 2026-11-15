@@ -1,23 +1,24 @@
-import multer from 'multer';
+import multer from "multer";
 import z, { AnyZodObject } from "zod/v3";
 import { RequestErrorTypes } from "./consts";
-import type { Request, Response } from "express";
+import type { Context, Next } from "hono";
 
- /*
-  * Formato de request tipado
-  */
-export type TypedRequest<T extends z.ZodType> = Request<
-  z.infer<T>["params"],
-  any,
-  z.infer<T>["body"],
-  z.infer<T>["query"]
->;
+/*
+ * Formato de request tipado
+ */
+export type TypedRequest<T extends z.ZodType> = {
+  body: z.infer<T>["body"];
+  params: z.infer<T>["params"];
+  query: z.infer<T>["query"];
+  headers: Record<string, string | undefined>;
+  cookies: Record<string, string>;
+};
 
-export type ControllerResponse<T> = Promise<Response<JamResponse<T>, Record<string, any>> | undefined>;
+export type ControllerResponse<T> = Promise<Response | undefined>;
 
- /*
-  * Formato de resposta padrão para todas as requisições do sistema
-  */
+/*
+ * Formato de resposta padrão para todas as requisições do sistema
+ */
 export class JamResponse<T> {
   data?: T;
   error?: {
@@ -43,12 +44,12 @@ export class JamResponse<T> {
   }
 }
 
- /*
-  * Padroniza a mensagem de erro do validador do Zod
-  */
+/*
+ * Padroniza a mensagem de erro do validador do Zod
+ */
 export const zodErrorMap: z.ZodErrorMap = (issue, ctx) => {
   let message: string | undefined;
-  
+
   console.log(issue.message);
 
   if (issue.code === "invalid_type") {
@@ -67,48 +68,83 @@ export const zodErrorMap: z.ZodErrorMap = (issue, ctx) => {
   };
 };
 
- /*
-  * Retorna uma função que valida o corpo de uma requisição
-  */
+const parseCookies = (cookieHeader: string): Record<string, string> => {
+  if (!cookieHeader.trim()) {
+    return {};
+  }
+
+  return cookieHeader
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .filter(Boolean)
+    .reduce<Record<string, string>>((acc, entry) => {
+      const [key, ...value] = entry.split("=");
+      acc[key] = decodeURIComponent(value.join("="));
+      return acc;
+    }, {});
+};
+
+const getRequestBody = async (c: Context) => {
+  const contentType = c.req.header("content-type") ?? "";
+
+  if (contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded")) {
+    return await c.req.parseBody();
+  }
+
+  if (contentType.includes("application/json")) {
+    try {
+      return await c.req.json();
+    } catch {
+      return {};
+    }
+  }
+
+  return {};
+};
+
+/*
+ * Retorna uma função que valida o corpo de uma requisição
+ */
 export function validate(schema: AnyZodObject) {
-  return async (req, res, next) => {
+  return async (c: Context, next: Next) => {
     const result = await schema.safeParseAsync({
-      body: req.body,
-      query: req.query,
-      params: req.params,
-      headers: req.headers,
-      cookies: req.cookies,
+      body: await getRequestBody(c),
+      query: c.req.query(),
+      params: c.req.param(),
+      headers: c.req.header(),
+      cookies: parseCookies(c.req.header("Cookie") ?? ""),
     });
 
     if (!result.success) {
       console.dir(result.error, { depth: null });
 
       const error = result.error.errors[0];
-      return res.status(400).json(
+      const field = error.path[error.path.length - 1]?.toString() ?? "field";
+
+      return c.json(
         new JamResponse({
-          field: error.path[error.path.length - 1].toString(),
+          field,
           message: error.message,
         }),
+        400,
       );
     }
 
-    req.data = result.data;
-
-    next();
+    await next();
   };
 }
 
- /*
-  * Multer, usado para validar envio de arquivos
-  */
+/*
+ * Multer, usado para validar envio de arquivos
+ */
 export const multerUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // Limite de 100MB por arquivo
+  limits: { fileSize: 100 * 1024 * 1024 },
 });
 
- /*
-  * Validador de arquivos do multer
-  */
+/*
+ * Validador de arquivos do multer
+ */
 export const fileValidationSchema = z.object({
   fieldname: z.string(),
   originalname: z.string(),

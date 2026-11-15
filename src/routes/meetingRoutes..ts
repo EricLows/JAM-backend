@@ -1,34 +1,15 @@
-import { multerUpload, validate } from "@/lib/validator.ts";
+import { Hono } from "hono";
+import { validate } from "@/lib/validator.ts";
 import { MeetingController } from "../controllers/meetingController";
-import { Router } from "express";
 import { MeetingValidator } from "@/validators/meetingValidator.ts";
 import { validateToken } from "@/lib/token.ts";
 
 const meetingController = new MeetingController();
 
-const meetingRouter = Router();
+const meetingRouter = new Hono();
 
-meetingRouter.post(
-  "/",
-  multerUpload.fields([
-    { name: "coverPhoto" },
-    { name: "pdf" },
-    { name: "photos" },
-  ]),
-  validate(MeetingValidator.postMeeting),
-  meetingController.postMeeting as any,
-);
-
-meetingRouter.get(
-  "/list",
-  validate(MeetingValidator.getMeetings),
-  meetingController.getMeetings as any,
-);
-
-meetingRouter.get(
-  "/:id",
-  validate(MeetingValidator.getMeeting),
-  meetingController.getMeeting as any,
-);
+meetingRouter.post("/", validate(MeetingValidator.postMeeting), (c) => meetingController.postMeeting(c));
+meetingRouter.get("/list", validate(MeetingValidator.getMeetings), (c) => meetingController.getMeetings(c));
+meetingRouter.get("/:id", validate(MeetingValidator.getMeeting), (c) => meetingController.getMeeting(c));
 
 export default meetingRouter;
