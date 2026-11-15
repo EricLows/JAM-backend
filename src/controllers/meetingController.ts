@@ -34,12 +34,12 @@ class MeetingController {
       let photos: ReqFile[] = [];
 
       if (!rawCoverPhoto) {
-        return Response.json(
+        return c.json(
           new JamResponse({
             field: "coverPhoto",
             message: "O encontro precisa de uma capa",
           }),
-          { status: 401 },
+          401,
         );
       }
 
@@ -77,7 +77,7 @@ class MeetingController {
           .filter((tag) => !Number.isNaN(tag)),
       });
 
-      return Response.json({ id: response }, { status: 201 });
+      return c.json({ id: response }, 201);
     } catch (e) {
       throw e;
     }
@@ -94,11 +94,11 @@ class MeetingController {
         Number(pageSize),
       );
 
-      return Response.json(
+      return c.json(
         new JamResponse({
           data: meetings,
         }),
-        { status: 200 },
+        200,
       );
     } catch (e) {
       throw e;
@@ -114,14 +114,14 @@ class MeetingController {
       const meeting = await MeetingService.getMeeting(Number(id));
 
       if (!meeting) {
-        return Response.json("", { status: 404 });
+        return c.json("", 404);
       }
 
-      return Response.json(
+      return c.json(
         new JamResponse({
           data: meeting,
         }),
-        { status: 200 },
+        200,
       );
     } catch (e) {
       throw e;

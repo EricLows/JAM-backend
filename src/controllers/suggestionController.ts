@@ -14,7 +14,7 @@ class SuggestionController {
         .catch(() => ({ name: undefined, message: undefined }));
       const response = await SuggestionService.postSuggestion(message, name);
 
-      return Response.json({ id: response }, { status: 201 });
+      return c.json({ id: response }, 201);
     } catch (e) {
       throw e;
     }
@@ -31,11 +31,11 @@ class SuggestionController {
         Number(pageSize),
       );
 
-      return Response.json(
+      return c.json(
         new JamResponse({
           data: suggestions,
         }),
-        { status: 200 },
+        200,
       );
     } catch (e) {
       throw e;

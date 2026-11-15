@@ -7,16 +7,16 @@ class LogController {
   /*
    * Busca os logs registrados
    */
-  async getLogs(c: Context): ControllerResponse<Log[]> {
+  async getLogs(c: Context): Promise<Response> {
     try {
       const { page, pageSize } = c.req.query();
       const logs = await LogService.getLogs(Number(page), Number(pageSize));
 
-      return Response.json(
+      return c.json(
         new JamResponse({
           data: logs,
         }),
-        { status: 200 },
+        200,
       );
     } catch (e) {
       throw e;

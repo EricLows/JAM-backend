@@ -31,7 +31,22 @@ const port = Number(process.env.PORT ?? 3000);
 app.use(
   "*",
   cors({
-    origin: process.env.CORS_ORIGIN_URL ?? "*",
+    origin: (origin, c) => {
+      return c.env.CORS_ORIGIN_URL || "*";
+    },
+    allowMethods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+    credentials: true,
   }),
 );
 
@@ -43,8 +58,14 @@ app.route("/tag", tagRouter);
 
 app.onError((err, c) => handleError(err as any, c));
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`Server is running at http://localhost:${info.port}`);
+app.notFound((c) => {
+  return c.json(
+    {
+      success: false,
+      message: "Route not found",
+    },
+    404,
+  );
 });
 
 export default app;

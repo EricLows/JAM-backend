@@ -13,7 +13,7 @@ class TagController {
         name,
       });
 
-      return Response.json({ id: response }, { status: 201 });
+      return c.json({ id: response }, 201);
     } catch (e) {
       throw e;
     }
@@ -26,11 +26,11 @@ class TagController {
     try {
       const tags = await TagService.getTags();
 
-      return Response.json(
+      return c.json(
         new JamResponse({
           data: tags,
         }),
-        { status: 200 },
+        200,
       );
     } catch (e) {
       throw e;
