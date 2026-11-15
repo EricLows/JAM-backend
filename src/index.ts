@@ -32,7 +32,14 @@ app.use(
   "*",
   cors({
     origin: (origin, c) => {
-      return c.env.CORS_ORIGIN_URL || "*";
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://jam-pscb.com.br",
+      ];
+
+      return allowedOrigins.includes(origin)
+        ? origin
+        : "";
     },
     allowMethods: [
       "GET",
@@ -45,6 +52,9 @@ app.use(
     allowHeaders: [
       "Content-Type",
       "Authorization",
+    ],
+    exposeHeaders: [
+      "Content-Length",
     ],
     credentials: true,
   }),
