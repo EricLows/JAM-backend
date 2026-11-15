@@ -18,30 +18,41 @@ export class JamError extends Error {
     this.message = message ?? "";
     this.field = field ?? "";
     this.metadata = metadata ?? "";
+
+    Object.setPrototypeOf(this, JamError.prototype);
   }
 }
 
 /**
  * Tratador de erros customizado do Hono
  */
-export const handleError = (err: JamError, c: Context) => {
-  let { statusCode, message, field, metadata } = err;
+export const handleError = (
+  err: Error,
+  c: Context
+): Response => {
 
-  console.log(err.message);
-  console.log(err.stack);
+  console.error("========== ERROR HANDLER ==========");
+  console.error("Name:", err.name);
+  console.error("Message:", err.message);
+  console.error("Stack:", err.stack);
+  console.error("Instance of JamError:", err instanceof JamError);
 
-  if (!statusCode) {
-    statusCode = 500;
-    message = err.message;
-    metadata = err.stack ?? "";
+  if (err instanceof JamError) {
+    return c.json(
+      new JamResponse({
+        message: err.message,
+        field: err.field,
+        metadata: err.metadata,
+      }),
+      err.statusCode as any
+    );
   }
 
   return c.json(
     new JamResponse({
-      message,
-      field,
-      metadata,
+      message: "Erro interno do servidor :(",
+      metadata: err.stack ?? "",
     }),
-    statusCode as any,
+    500
   );
 };
