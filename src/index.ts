@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { serve } from "@hono/node-server";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { seed } from "./db/seed";
 import { handleError } from "./lib/error";
@@ -56,7 +55,6 @@ app.use(
     exposeHeaders: [
       "Content-Length",
     ],
-    credentials: true,
   }),
 );
 
