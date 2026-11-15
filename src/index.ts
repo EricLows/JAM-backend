@@ -12,17 +12,19 @@ import suggestionRouter from "./routes/suggestionRoutes";
 import meetingRouter from "./routes/meetingRoutes.";
 import tagRouter from "./routes/tagRoutes";
 
-const result = dotenv.config();
+if (!process.env.PORT) {
+  const result = dotenv.config();
 
-if (result.error) {
-  console.log(result.error);
-  process.exit(0);
+  if (result.error) {
+    console.log(result.error);
+    process.exit(0);
+  }
 }
 
 export const db = drizzle(process.env.DATABASE_URL!, { relations });
 
 setCypherKey(process.env.AES_CYPHER_KEY);
-seed();
+// seed();
 
 const app = new Hono();
 const port = Number(process.env.PORT ?? 3000);
@@ -36,25 +38,11 @@ app.use(
         "https://jam-pscb.com.br",
       ];
 
-      return allowedOrigins.includes(origin)
-        ? origin
-        : "";
+      return allowedOrigins.includes(origin) ? origin : "";
     },
-    allowMethods: [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "OPTIONS",
-    ],
-    allowHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
-    exposeHeaders: [
-      "Content-Length",
-    ],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
   }),
 );
 
