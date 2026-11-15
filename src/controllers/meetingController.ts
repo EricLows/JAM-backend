@@ -88,19 +88,24 @@ class MeetingController {
    */
   async getMeetings(c: Context): Promise<Response> {
     try {
+      console.log("Obtendo dados");
       const { page, pageSize } = c.req.query();
+      console.log("Iniciando a busca das meetings");
       const meetings = await MeetingService.getMeetings(
         Number(page),
         Number(pageSize),
       );
 
+      console.log("Conseguimos preparar as meetings. Retornando agora");
       return c.json(
         new JamResponse({
           data: meetings,
         }),
         200,
       );
+      console.log("Não deveria chegar aqui");
     } catch (e) {
+      console.log("NOOOOOOOOOOOOOOOOOOOOOOOOO");
       throw e;
     }
   }

@@ -111,6 +111,7 @@ const MeetingService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
+    console.log("Buscando meetings");
     const meetings = await db.query.meetingTable.findMany({
       columns: {
         id: true,
@@ -136,10 +137,12 @@ const MeetingService = {
       offset: (page - 1) * pageSize,
     });
 
+    console.log(`Foram encontradas ${meetings.length} meetings`);
     if (meetings.length === 0) {
       return [];
     }
 
+    console.log("Preparando meetings");
     return meetings.map(
       (meeting): MeetingSimple => ({
         id: meeting.id,
