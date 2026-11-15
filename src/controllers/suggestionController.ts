@@ -7,12 +7,14 @@ class SuggestionController {
   /*
    * Registra uma sugestão
    */
-  async postSuggestion(c: Context): ControllerResponse<Suggestion[]> {
+  async postSuggestion(c: Context): Promise<Response> {
     try {
-      const { name, message } = await c.req.json().catch(() => ({ name: undefined, message: undefined }));
+      const { name, message } = await c.req
+        .json()
+        .catch(() => ({ name: undefined, message: undefined }));
       const response = await SuggestionService.postSuggestion(message, name);
 
-      return c.json({ id: response }, 201);
+      return Response.json({ id: response }, { status: 201 });
     } catch (e) {
       throw e;
     }
@@ -21,16 +23,19 @@ class SuggestionController {
   /*
    * Busca as sugestões registradas
    */
-  async getSuggestions(c: Context): ControllerResponse<Suggestion[]> {
+  async getSuggestions(c: Context): Promise<Response> {
     try {
       const { page, pageSize } = c.req.query();
-      const suggestions = await SuggestionService.getSuggestions(Number(page), Number(pageSize));
+      const suggestions = await SuggestionService.getSuggestions(
+        Number(page),
+        Number(pageSize),
+      );
 
-      return c.json(
+      return Response.json(
         new JamResponse({
           data: suggestions,
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;

@@ -12,11 +12,11 @@ class LogController {
       const { page, pageSize } = c.req.query();
       const logs = await LogService.getLogs(Number(page), Number(pageSize));
 
-      return c.json(
+      return Response.json(
         new JamResponse({
           data: logs,
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;

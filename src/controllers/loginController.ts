@@ -14,30 +14,35 @@ class LoginController {
       const authHeader = c.req.header("Authorization");
 
       if (!authHeader || !authHeader.startsWith("Basic ")) {
-        return c.json(new JamResponse({ message: "Autenticação inválida" }), 401);
+        return Response.json(
+          new JamResponse({ message: "Autenticação inválida" }),
+          { status: 401 },
+        );
       }
 
       const base64Credentials = authHeader.split(" ")[1];
-      const credentials = Buffer.from(base64Credentials, "base64").toString("utf-8");
+      const credentials = Buffer.from(base64Credentials, "base64").toString(
+        "utf-8",
+      );
       const [email, password] = credentials.split(":");
 
       if (!email?.length) {
-        return c.json(
+        return Response.json(
           new JamResponse<User>({
             message: "Informe um e-mail",
             field: "email",
           }),
-          403,
+          { status: 403 },
         );
       }
 
       if (!password?.length) {
-        return c.json(
+        return Response.json(
           new JamResponse<User>({
             message: "Informe sua senha",
             field: "password",
           }),
-          403,
+          { status: 403 },
         );
       }
 
@@ -48,9 +53,12 @@ class LoginController {
         email: user.email,
       });
 
-      await LogService.log("Usuário", `"${user.username}" entrou na sua conta.`);
+      await LogService.log(
+        "Usuário",
+        `"${user.username}" entrou na sua conta.`,
+      );
 
-      return c.json(
+      return Response.json(
         new JamResponse<User>({
           data: {
             token,
@@ -58,7 +66,7 @@ class LoginController {
             avatar: user.avatar,
           },
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;
@@ -76,32 +84,32 @@ class LoginController {
 
       const emailExists = await LoginService.emailExists(email);
       if (emailExists) {
-        return c.json(
+        return Response.json(
           new JamResponse({
             field: "email",
             message: "E-mail já cadastrado",
           }),
-          401,
+          { status: 401 },
         );
       }
 
       if (password != passwordConfirm) {
-        return c.json(
+        return Response.json(
           new JamResponse({
             field: "passwordConfirm",
             message: "Confirme sua senha corretamente",
           }),
-          401,
+          { status: 401 },
         );
       }
 
       const id = await LoginService.register(username, email, password);
 
-      return c.json(
+      return Response.json(
         new JamResponse({
           data: id,
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;

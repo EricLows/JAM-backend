@@ -9,18 +9,21 @@ class MeetingController {
   /*
    * Registra um encontro
    */
-  async postMeeting(c: Context): ControllerResponse<Meeting[]> {
+  async postMeeting(c: Context): Promise<Response> {
     try {
       const formData = await c.req.parseBody();
-      const { date, description, responsible, title, tags } = Object.fromEntries(
-        Object.entries(formData).filter(([key]) => !["coverPhoto", "pdf", "photos"].includes(key)),
-      ) as unknown as {
-        date: string;
-        description: string;
-        responsible: string;
-        title: string;
-        tags?: string | string[];
-      };
+      const { date, description, responsible, title, tags } =
+        Object.fromEntries(
+          Object.entries(formData).filter(
+            ([key]) => !["coverPhoto", "pdf", "photos"].includes(key),
+          ),
+        ) as unknown as {
+          date: string;
+          description: string;
+          responsible: string;
+          title: string;
+          tags?: string | string[];
+        };
 
       const rawCoverPhoto = formData["coverPhoto"];
       const rawPdf = formData["pdf"];
@@ -31,17 +34,19 @@ class MeetingController {
       let photos: ReqFile[] = [];
 
       if (!rawCoverPhoto) {
-        return c.json(
+        return Response.json(
           new JamResponse({
             field: "coverPhoto",
             message: "O encontro precisa de uma capa",
           }),
-          401,
+          { status: 401 },
         );
       }
 
       if (rawCoverPhoto) {
-        coverPhoto = Array.isArray(rawCoverPhoto) ? rawCoverPhoto[0] : rawCoverPhoto;
+        coverPhoto = Array.isArray(rawCoverPhoto)
+          ? rawCoverPhoto[0]
+          : rawCoverPhoto;
       }
 
       if (rawPdf) {
@@ -49,7 +54,9 @@ class MeetingController {
       }
 
       if (rawPhotos) {
-        photos = (Array.isArray(rawPhotos) ? rawPhotos : [rawPhotos]).filter(Boolean) as ReqFile[];
+        photos = (Array.isArray(rawPhotos) ? rawPhotos : [rawPhotos]).filter(
+          Boolean,
+        ) as ReqFile[];
       }
 
       const response = await MeetingService.postMeeting({
@@ -60,10 +67,17 @@ class MeetingController {
         pdf,
         coverPhoto: coverPhoto!,
         photos,
-        tags: (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : []).map(Number).filter((tag) => !Number.isNaN(tag)),
+        tags: (Array.isArray(tags)
+          ? tags
+          : typeof tags === "string"
+            ? tags.split(",")
+            : []
+        )
+          .map(Number)
+          .filter((tag) => !Number.isNaN(tag)),
       });
 
-      return c.json({ id: response }, 201);
+      return Response.json({ id: response }, { status: 201 });
     } catch (e) {
       throw e;
     }
@@ -72,16 +86,19 @@ class MeetingController {
   /*
    * Busca uma lista de encontros
    */
-  async getMeetings(c: Context): ControllerResponse<Meeting[]> {
+  async getMeetings(c: Context): Promise<Response> {
     try {
       const { page, pageSize } = c.req.query();
-      const meetings = await MeetingService.getMeetings(Number(page), Number(pageSize));
+      const meetings = await MeetingService.getMeetings(
+        Number(page),
+        Number(pageSize),
+      );
 
-      return c.json(
+      return Response.json(
         new JamResponse({
           data: meetings,
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;
@@ -91,20 +108,20 @@ class MeetingController {
   /*
    * Busca um determinado encontro
    */
-  async getMeeting(c: Context): ControllerResponse<Meeting[]> {
+  async getMeeting(c: Context): Promise<Response> {
     try {
       const { id } = c.req.param();
       const meeting = await MeetingService.getMeeting(Number(id));
 
       if (!meeting) {
-        return c.text("", 404);
+        return Response.json("", { status: 404 });
       }
 
-      return c.json(
+      return Response.json(
         new JamResponse({
           data: meeting,
         }),
-        200,
+        { status: 200 },
       );
     } catch (e) {
       throw e;

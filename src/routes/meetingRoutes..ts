@@ -8,7 +8,7 @@ const meetingController = new MeetingController();
 
 const meetingRouter = new Hono();
 
-meetingRouter.post("/", validate(MeetingValidator.postMeeting), (c) => meetingController.postMeeting(c));
+meetingRouter.post("/", validateToken, validate(MeetingValidator.postMeeting), (c) => meetingController.postMeeting(c));
 meetingRouter.get("/list", validate(MeetingValidator.getMeetings), (c) => meetingController.getMeetings(c));
 meetingRouter.get("/:id", validate(MeetingValidator.getMeeting), (c) => meetingController.getMeeting(c));
 

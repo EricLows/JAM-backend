@@ -44,6 +44,6 @@ export async function validateToken(c: Context, next: Next) {
 
     await next();
   } catch (e) {
-    return c.json(new JamResponse({ message: "Faça login para acessar esse recurso" }), 401);
+    return Response.json(new JamResponse({ message: "Faça login para acessar esse recurso" }), {status: 401});
   }
 }
