@@ -14,7 +14,9 @@ const LogService = {
         logType,
         message,
       })
-      .returning();
+      .returning()
+      .prepare("log")
+      .execute();
 
     return result.id;
   },
@@ -28,7 +30,9 @@ const LogService = {
       .from(logsTable)
       .orderBy(desc(logsTable.id))
       .limit(pageSize)
-      .offset((page - 1) * pageSize);
+      .offset((page - 1) * pageSize)
+      .prepare('get_logs')
+      .execute();
     return results;
   },
 };

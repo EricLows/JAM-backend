@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
 import { seed } from "./db/seed";
 import { handleError } from "./lib/error";
 import { relations, setCypherKey } from "./db/schema";
@@ -11,23 +11,30 @@ import logRouter from "./routes/logRoutes";
 import suggestionRouter from "./routes/suggestionRoutes";
 import meetingRouter from "./routes/meetingRoutes.";
 import tagRouter from "./routes/tagRoutes";
+import postgres from "postgres";
+import { serve } from "@hono/node-server";
 
-if (!process.env.PORT) {
+let port: number | undefined;
+
+if (process.env.NODE_ENV == "dev") {
   const result = dotenv.config();
 
   if (result.error) {
     console.log(result.error);
     process.exit(0);
   }
+
+  port = Number(process.env.PORT);
+  console.log(port);
 }
 
-export const db = drizzle(process.env.DATABASE_URL!, { relations });
+const client = postgres(process.env.DATABASE_URL!, { prepare: true });
+export const db = drizzle({ client, relations });
 
 setCypherKey(process.env.AES_CYPHER_KEY);
 // seed();
 
 const app = new Hono();
-const port = Number(process.env.PORT ?? 3000);
 
 app.use(
   "*",
@@ -63,5 +70,12 @@ app.notFound((c) => {
     404,
   );
 });
+
+if (port) {
+  serve({
+    fetch: app.fetch,
+    port,
+  })
+}
 
 export default app;

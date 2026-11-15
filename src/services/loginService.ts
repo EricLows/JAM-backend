@@ -1,5 +1,5 @@
 import { User, usersTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "..";
 import { JamError } from "@/lib/error";
 
@@ -7,18 +7,21 @@ const LoginService = {
   /*
    * Acessa uma conta, caso ela exista
    */
-  async login(
-    email: string,
-    password: string,
-  ): Promise<User> {
-    const [result] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  async login(email: string, password: string): Promise<User> {
+    const loginQuery = db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, sql.placeholder("email")))
+      .limit(1)
+      .prepare("login");
+    const [result] = await loginQuery.execute({ email });
 
     if (!result) {
-      throw new JamError(403, 'E-mail não existe', 'email');
+      throw new JamError(403, "E-mail não existe", "email");
     }
 
     if (result.password != password) {
-      throw new JamError(403, 'Senha incorreta', 'password');
+      throw new JamError(403, "Senha incorreta", "password");
     }
 
     return result;
@@ -31,7 +34,9 @@ const LoginService = {
     const result = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.email, email));
+      .where(eq(usersTable.email, email))
+      .prepare("email_exists")
+      .execute();
 
     return result.length > 0;
   },
@@ -47,7 +52,7 @@ const LoginService = {
     avatar?: string,
   ): Promise<number> {
     if (await this.emailExists(email)) {
-      throw new JamError(403, 'E-mail já existe', 'email');
+      throw new JamError(403, "E-mail já existe", "email");
     }
 
     const [result] = await db
@@ -58,7 +63,9 @@ const LoginService = {
         password,
         avatar,
       })
-      .returning();
+      .returning()
+      .prepare("register")
+      .execute();
 
     return result[0].id;
   },

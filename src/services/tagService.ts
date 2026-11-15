@@ -7,15 +7,15 @@ const TagService = {
   /*
    * Registra uma tag
    */
-  async postTag({
-    name,
-  }): Promise<number> {
+  async postTag({ name }): Promise<number> {
     const [result] = await db
       .insert(tagTable)
       .values({
         name,
       })
-      .returning();
+      .returning()
+      .prepare("post_tag")
+      .execute();
 
     return result.id;
   },
@@ -28,6 +28,8 @@ const TagService = {
       .select()
       .from(tagTable)
       .orderBy(asc(tagTable.id))
+      .prepare("get_tags")
+      .execute();
     return results;
   },
 };

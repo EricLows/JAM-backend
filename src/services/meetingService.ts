@@ -70,26 +70,36 @@ const MeetingService = {
             coverPhoto: coverPhotoStorage.key,
             pdf: pdfStorage?.key,
           })
-          .returning();
+          .returning()
+          .prepare("create_meeting")
+          .execute();
 
         if (tags.length > 0) {
-          await tx.insert(tagToMeeting).values(
-            tags.map((tag) => ({
-              meetingId: meeting.id,
-              tagId: tag,
-            })),
-          );
+          await tx
+            .insert(tagToMeeting)
+            .values(
+              tags.map((tag) => ({
+                meetingId: meeting.id,
+                tagId: tag,
+              })),
+            )
+            .prepare("set_meeting_tags")
+            .execute();
         }
 
         if (photosStorage.length > 0) {
-          await tx.insert(photoTable).values(
-            photosStorage.map((photo) => ({
-              meetingId: meeting.id,
-              name: photo.fileName,
-              date,
-              link: photo.key,
-            })),
-          );
+          await tx
+            .insert(photoTable)
+            .values(
+              photosStorage.map((photo) => ({
+                meetingId: meeting.id,
+                name: photo.fileName,
+                date,
+                link: photo.key,
+              })),
+            )
+            .prepare("create_meeting_photos")
+            .execute();
         }
 
         return meeting;
@@ -112,30 +122,33 @@ const MeetingService = {
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
     console.log("Buscando meetings");
-    const meetings = await db.query.meetingTable.findMany({
-      columns: {
-        id: true,
-        title: true,
-        description: true,
-        date: true,
-        coverPhoto: true,
-        likes: true,
-        pdf: true,
-        responsible: true,
-      },
-      with: {
-        photos: {
-          columns: {
-            id: true,
-            link: true,
-            name: true,
-          },
+    const meetings = await db.query.meetingTable
+      .findMany({
+        columns: {
+          id: true,
+          title: true,
+          description: true,
+          date: true,
+          coverPhoto: true,
+          likes: true,
+          pdf: true,
+          responsible: true,
         },
-        tags: true,
-      },
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
-    });
+        with: {
+          photos: {
+            columns: {
+              id: true,
+              link: true,
+              name: true,
+            },
+          },
+          tags: true,
+        },
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+      })
+      .prepare("get_meetings")
+      .execute();
 
     console.log(`Foram encontradas ${meetings.length} meetings`);
     if (meetings.length === 0) {
@@ -162,31 +175,34 @@ const MeetingService = {
    * Busca um determinado encontro
    */
   async getMeeting(id: number): Promise<Meeting | undefined> {
-    const meeting = await db.query.meetingTable.findFirst({
-      columns: {
-        id: true,
-        title: true,
-        description: true,
-        date: true,
-        coverPhoto: true,
-        likes: true,
-        pdf: true,
-        responsible: true,
-      },
-      with: {
-        photos: {
-          columns: {
-            id: true,
-            link: true,
-            name: true,
-          },
+    const meeting = await db.query.meetingTable
+      .findFirst({
+        columns: {
+          id: true,
+          title: true,
+          description: true,
+          date: true,
+          coverPhoto: true,
+          likes: true,
+          pdf: true,
+          responsible: true,
         },
-        tags: true,
-      },
-      where: {
-        id,
-      },
-    });
+        with: {
+          photos: {
+            columns: {
+              id: true,
+              link: true,
+              name: true,
+            },
+          },
+          tags: true,
+        },
+        where: {
+          id,
+        },
+      })
+      .prepare("get_meeting")
+      .execute();
 
     if (!meeting) return undefined;
 

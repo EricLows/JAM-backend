@@ -14,7 +14,9 @@ const SuggestionService = {
         name,
         message,
       })
-      .returning();
+      .returning()
+      .prepare("post_suggestion")
+      .execute();
 
     return result.id;
   },
@@ -22,13 +24,18 @@ const SuggestionService = {
   /*
    * Busca os suggestions registrados
    */
-  async getSuggestions(page: number = 1, pageSize: number = 50): Promise<Suggestion[]> {
+  async getSuggestions(
+    page: number = 1,
+    pageSize: number = 50,
+  ): Promise<Suggestion[]> {
     const results = await db
       .select()
       .from(suggestionTable)
       .orderBy(desc(suggestionTable.id))
       .limit(pageSize)
-      .offset((page - 1) * pageSize);
+      .offset((page - 1) * pageSize)
+      .prepare("get_suggestions")
+      .execute();
     return results;
   },
 };

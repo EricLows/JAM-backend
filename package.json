@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "tsx --watch src/index.ts",
+    "start": "NODE_ENV=dev tsx --watch src/index.ts",
+    "wrangler-start":"npx wrangler dev",
+    "wrangler-deploy":"npx wrangler deploy",
     "postgres-install": "sudo docker pull postgres && sudo docker tag postgres:latest jam-postgres:latest && sudo docker rmi postgres:latest",
     "postgres-volume": "sudo docker volume create jam_volume",
     "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
