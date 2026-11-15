@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { validate } from "@/lib/validator.ts";
+import { validate } from "@/lib/validator";
 import { SuggestionController } from "../controllers/suggestionController";
-import { SuggestionValidator } from "@/validators/suggestionValidator.ts";
-import { validateToken } from "@/lib/token.ts";
+import { SuggestionValidator } from "@/validators/suggestionValidator";
+import { validateToken } from "@/lib/token";
 
 const suggestionController = new SuggestionController();
 

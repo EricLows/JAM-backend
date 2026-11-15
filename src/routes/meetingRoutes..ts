@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { validate } from "@/lib/validator.ts";
+import { validate } from "@/lib/validator";
 import { MeetingController } from "../controllers/meetingController";
-import { MeetingValidator } from "@/validators/meetingValidator.ts";
-import { validateToken } from "@/lib/token.ts";
+import { MeetingValidator } from "@/validators/meetingValidator";
+import { validateToken } from "@/lib/token";
 
 const meetingController = new MeetingController();
 

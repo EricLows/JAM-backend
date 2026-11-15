@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { validate } from "@/lib/validator.ts";
-import { LogController } from "../controllers/logController.ts";
-import { LogValidator } from "@/validators/logValidator.ts";
-import { validateToken } from "@/lib/token.ts";
+import { validate } from "@/lib/validator";
+import { LogController } from "../controllers/logController";
+import { LogValidator } from "@/validators/logValidator";
+import { validateToken } from "@/lib/token";
 
 const logController = new LogController();
 

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { validate } from "@/lib/validator.ts";
-import { LoginController } from "../controllers/loginController.ts";
-import { LoginValidator } from "@/validators/loginValidator.ts";
+import { validate } from "@/lib/validator";
+import { LoginController } from "../controllers/loginController";
+import { LoginValidator } from "@/validators/loginValidator";
 
 const loginController = new LoginController();
 

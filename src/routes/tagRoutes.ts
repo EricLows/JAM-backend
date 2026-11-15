@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { validate } from "@/lib/validator.ts";
+import { validate } from "@/lib/validator";
 import { TagController } from "../controllers/tagController";
-import { TagValidator } from "@/validators/tagValidator.ts";
-import { validateToken } from "@/lib/token.ts";
+import { TagValidator } from "@/validators/tagValidator";
+import { validateToken } from "@/lib/token";
 
 const tagController = new TagController();
 

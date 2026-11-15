@@ -3,15 +3,15 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { seed } from "./db/seed.ts";
-import { handleError } from "./lib/error.ts";
-import { relations, setCypherKey } from "./db/schema.ts";
+import { seed } from "./db/seed";
+import { handleError } from "./lib/error";
+import { relations, setCypherKey } from "./db/schema";
 
-import loginRouter from "./routes/loginRoutes.ts";
-import logRouter from "./routes/logRoutes.ts";
-import suggestionRouter from "./routes/suggestionRoutes.ts";
-import meetingRouter from "./routes/meetingRoutes..ts";
-import tagRouter from "./routes/tagRoutes.ts";
+import loginRouter from "./routes/loginRoutes";
+import logRouter from "./routes/logRoutes";
+import suggestionRouter from "./routes/suggestionRoutes";
+import meetingRouter from "./routes/meetingRoutes.";
+import tagRouter from "./routes/tagRoutes";
 
 const result = dotenv.config();
 
