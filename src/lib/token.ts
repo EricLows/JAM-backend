@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import { usersTable } from "@/db/schema";
-import { db } from "..";
 import { and, eq } from "drizzle-orm";
 import type { Context, Next } from "hono";
 import { JamResponse } from "./validator";
+import { createDb } from "../db/db";
 
 /*
  * Cria um token
@@ -32,6 +32,7 @@ export async function validateToken(c: Context, next: Next) {
       email: string;
     };
 
+    const db = createDb(process.env.DB_CONNECTION);
     const [user] = await db
       .select()
       .from(usersTable)

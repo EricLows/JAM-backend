@@ -46,6 +46,7 @@ class LoginController {
         );
       }
 
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const user = await LoginService.login(email, password);
       const token = createValidToken({
         id: user.id,
@@ -82,6 +83,7 @@ class LoginController {
       const body = await c.req.json().catch(() => ({}));
       const { username, email, password, passwordConfirm } = body;
 
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const emailExists = await LoginService.emailExists(email);
       if (emailExists) {
         return c.json(

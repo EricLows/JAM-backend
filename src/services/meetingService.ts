@@ -1,8 +1,8 @@
 import { meetingTable, photoTable, tagToMeeting } from "@/db/schema";
-import { db } from "..";
 import { Meeting, MeetingSimple } from "@/types/meeting";
 import { ReqFile } from "@/types/file";
 import { deleteFile, FileStorage, getFileUrl, uploadFile } from "@/lib/storage";
+import { createDb } from "../db/db";
 
 const MeetingService = {
   /*
@@ -59,6 +59,7 @@ const MeetingService = {
         filesKeys.push(photoStorage.key);
       }
 
+      const db = createDb(process.env.DB_CONNECTION);
       const result = await db.transaction(async (tx) => {
         const [meeting] = await tx
           .insert(meetingTable)
@@ -121,7 +122,7 @@ const MeetingService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
-    console.log("Buscando meetings");
+    const db = createDb(process.env.DB_CONNECTION);
     const meetings = await db.query.meetingTable
       .findMany({
         columns: {
@@ -150,12 +151,10 @@ const MeetingService = {
       .prepare("get_meetings")
       .execute();
 
-    console.log(`Foram encontradas ${meetings.length} meetings`);
     if (meetings.length === 0) {
       return [];
     }
 
-    console.log("Preparando meetings");
     return meetings.map(
       (meeting): MeetingSimple => ({
         id: meeting.id,
@@ -175,6 +174,7 @@ const MeetingService = {
    * Busca um determinado encontro
    */
   async getMeeting(id: number): Promise<Meeting | undefined> {
+    const db = createDb(process.env.DB_CONNECTION);
     const meeting = await db.query.meetingTable
       .findFirst({
         columns: {

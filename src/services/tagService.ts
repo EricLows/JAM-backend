@@ -1,13 +1,14 @@
 import { tagTable } from "@/db/schema";
-import { db } from "..";
 import { asc } from "drizzle-orm";
 import { Tag } from "@/types/tag";
+import { createDb } from "../db/db";
 
 const TagService = {
   /*
    * Registra uma tag
    */
   async postTag({ name }): Promise<number> {
+    const db = createDb(process.env.DB_CONNECTION);
     const [result] = await db
       .insert(tagTable)
       .values({
@@ -24,6 +25,7 @@ const TagService = {
    * Busca as tags registradas
    */
   async getTags(): Promise<Tag[]> {
+    const db = createDb(process.env.DB_CONNECTION);
     const results = await db
       .select()
       .from(tagTable)

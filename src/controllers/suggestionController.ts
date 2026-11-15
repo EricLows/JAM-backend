@@ -12,6 +12,8 @@ class SuggestionController {
       const { name, message } = await c.req
         .json()
         .catch(() => ({ name: undefined, message: undefined }));
+
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const response = await SuggestionService.postSuggestion(message, name);
 
       return c.json({ id: response }, 201);
@@ -26,6 +28,8 @@ class SuggestionController {
   async getSuggestions(c: Context): Promise<Response> {
     try {
       const { page, pageSize } = c.req.query();
+
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const suggestions = await SuggestionService.getSuggestions(
         Number(page),
         Number(pageSize),

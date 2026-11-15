@@ -28,13 +28,24 @@ if (process.env.NODE_ENV == "dev") {
   console.log(port);
 }
 
-const client = postgres(process.env.DATABASE_URL!, { prepare: true });
-export const db = drizzle({ client, relations });
+function createDb(connectionString: string) {
+  const client = postgres(connectionString, {
+    max: 5,
+    prepare: true,
+    fetch_types: false,
+  });
 
-setCypherKey(process.env.AES_CYPHER_KEY);
-// seed();
+  return drizzle({ client, relations });
+}
 
-const app = new Hono();
+const app = new Hono<{
+  Bindings: {
+    HYPERDRIVE: any;
+  };
+  Variables: {
+    db: ReturnType<typeof createDb>;
+  };
+}>();
 
 app.use(
   "*",

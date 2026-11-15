@@ -10,6 +10,8 @@ class LogController {
   async getLogs(c: Context): Promise<Response> {
     try {
       const { page, pageSize } = c.req.query();
+
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const logs = await LogService.getLogs(Number(page), Number(pageSize));
 
       return c.json(

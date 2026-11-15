@@ -9,6 +9,8 @@ class TagController {
   async postTag(c: Context): Promise<Response> {
     try {
       const { name } = await c.req.json().catch(() => ({ name: undefined }));
+
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const response = await TagService.postTag({
         name,
       });
@@ -24,6 +26,7 @@ class TagController {
    */
   async getTags(c: Context): Promise<Response> {
     try {
+      process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const tags = await TagService.getTags();
 
       return c.json(

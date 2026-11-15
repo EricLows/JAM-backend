@@ -1,13 +1,14 @@
 import { suggestionTable } from "@/db/schema";
-import { db } from "..";
 import { desc } from "drizzle-orm";
 import { Suggestion } from "@/types/suggestion";
+import { createDb } from "../db/db";
 
 const SuggestionService = {
   /*
    * Registra um suggestion
    */
   async postSuggestion(message: string, name?: string): Promise<number> {
+    const db = createDb(process.env.DB_CONNECTION);
     const [result] = await db
       .insert(suggestionTable)
       .values({
@@ -28,6 +29,7 @@ const SuggestionService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<Suggestion[]> {
+    const db = createDb(process.env.DB_CONNECTION);
     const results = await db
       .select()
       .from(suggestionTable)
