@@ -3,37 +3,46 @@ import { MeetingService } from "@/services/meetingService";
 import { ControllerResponse, JamResponse } from "@/lib/validator";
 import { Meeting } from "@/types/meeting";
 
-import type { ReqFile } from "@/types/file";
-
 class MeetingController {
   /*
    * Registra um encontro
    */
   async postMeeting(c: Context): Promise<Response> {
     try {
-      const formData = await c.req.parseBody();
-      const { date, description, responsible, title, tags } =
-        Object.fromEntries(
-          Object.entries(formData).filter(
-            ([key]) => !["coverPhoto", "pdf", "photos"].includes(key),
-          ),
-        ) as unknown as {
-          date: string;
-          description: string;
-          responsible: string;
-          title: string;
-          tags?: string | string[];
-        };
+      const formData = await c.req.formData();
 
-      const rawCoverPhoto = formData["coverPhoto"];
-      const rawPdf = formData["pdf"];
-      const rawPhotos = formData["photos"];
+      const date = formData.get("date") as string;
+      const description = formData.get("description") as string;
+      const responsible = formData.get("responsible") as string;
+      const title = formData.get("title") as string;
 
-      let coverPhoto: ReqFile | undefined;
-      let pdf: ReqFile | undefined;
-      let photos: ReqFile[] = [];
+      const coverPhoto = formData.get("coverPhoto") as File;
 
-      if (!rawCoverPhoto) {
+      const tags: number[] = [];
+      const photos: File[] = [];
+      let pdf: File | undefined;
+
+      console.dir(formData, { depth: null });
+
+      for (const [key, value] of formData.entries()) {
+        switch (key) {
+          case "tags[]":
+          case "tags":
+            tags.push(Number(value));
+            break;
+
+          case "photos[]":
+          case "photos":
+            photos.push(value as File);
+            break;
+
+          case "pdf":
+            pdf = value as File;
+            break;
+        }
+      }
+
+      if (!coverPhoto) {
         return c.json(
           new JamResponse({
             field: "coverPhoto",
@@ -43,22 +52,6 @@ class MeetingController {
         );
       }
 
-      if (rawCoverPhoto) {
-        coverPhoto = Array.isArray(rawCoverPhoto)
-          ? rawCoverPhoto[0]
-          : rawCoverPhoto;
-      }
-
-      if (rawPdf) {
-        pdf = Array.isArray(rawPdf) ? rawPdf[0] : rawPdf;
-      }
-
-      if (rawPhotos) {
-        photos = (Array.isArray(rawPhotos) ? rawPhotos : [rawPhotos]).filter(
-          Boolean,
-        ) as ReqFile[];
-      }
-
       process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const response = await MeetingService.postMeeting({
         date: new Date(date),
@@ -66,16 +59,9 @@ class MeetingController {
         responsible,
         title,
         pdf,
-        coverPhoto: coverPhoto!,
+        coverPhoto,
         photos,
-        tags: (Array.isArray(tags)
-          ? tags
-          : typeof tags === "string"
-            ? tags.split(",")
-            : []
-        )
-          .map(Number)
-          .filter((tag) => !Number.isNaN(tag)),
+        tags,
       });
 
       return c.json({ id: response }, 201);
@@ -89,10 +75,11 @@ class MeetingController {
    */
   async getMeetings(c: Context): Promise<Response> {
     try {
-      const { page, pageSize } = c.req.query();
+      const { search, page, pageSize } = c.req.query();
 
       process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const meetings = await MeetingService.getMeetings(
+        search,
         Number(page),
         Number(pageSize),
       );

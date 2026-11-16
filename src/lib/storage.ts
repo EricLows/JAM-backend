@@ -33,34 +33,24 @@ export type FileStorage = {
 /*
  * Salva um arquivo no storage
  */
-export async function uploadFile(repository: string, data: {
-  reqFile: ReqFile;
-  rename?: string;
-}): Promise<FileStorage> {
-  const { reqFile, rename } = data;
-  const fileName = rename ?? reqFile.originalname;
-  const contentType = reqFile.mimetype;
+export async function uploadFile(repository: string, file: File, fileName: string): Promise<FileStorage> {
+  const contentType = file.type;
   const key = `${repository}/${randomUUID()}-${fileName}`;
 
   if (!process.env.R2_PUBLIC_URL) {
     throw "Sem URl de acesso público de arquivos!";
   }
 
-  let file = Buffer.from(reqFile.buffer);
-
-  // Se for arquivo de imagem, comprime ele
-  if (contentType.includes("image")) {
-    const compresed = await compressImage(file);
-    file = Buffer.from(compresed);
-  }
+  // TODO - compressão de imagem
 
   const fileUrl = getFileUrl(key);
+  const body = new Uint8Array(await file.arrayBuffer());
 
   await storage.send(
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
-      Body: file,
+      Body: body,
       ContentType: contentType,
     }),
   );

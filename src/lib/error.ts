@@ -36,6 +36,7 @@ export const handleError = (
   console.error("Message:", err.message);
   console.error("Stack:", err.stack);
   console.error("Instance of JamError:", err instanceof JamError);
+  console.dir(err, {depth: null});
 
   if (err instanceof JamError) {
     return c.json(

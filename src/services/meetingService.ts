@@ -3,6 +3,7 @@ import { Meeting, MeetingSimple } from "@/types/meeting";
 import { ReqFile } from "@/types/file";
 import { deleteFile, FileStorage, getFileUrl, uploadFile } from "@/lib/storage";
 import { createDb } from "../db/db";
+import { EmptyFilter } from "drizzle-orm";
 
 const MeetingService = {
   /*
@@ -22,9 +23,9 @@ const MeetingService = {
     description: string;
     responsible: string;
     title: string;
-    pdf: ReqFile | undefined;
-    coverPhoto: ReqFile;
-    photos: ReqFile[];
+    pdf: File | undefined;
+    coverPhoto: File;
+    photos: File[];
     tags: number[];
   }): Promise<number> {
     const filesKeys: string[] = [];
@@ -35,26 +36,22 @@ const MeetingService = {
 
       const coverPhotoStorage: FileStorage = await uploadFile(
         "meeting-cover-photo",
-        {
-          reqFile: coverPhoto,
-          rename: `${title}.jpg`,
-        },
+        coverPhoto,
+        `${title}.jpg`,
       );
       filesKeys.push(coverPhotoStorage.key);
 
       if (pdf) {
-        pdfStorage = await uploadFile("meeting-files", {
-          reqFile: pdf,
-          rename: `${title}.pdf`,
-        });
+        pdfStorage = await uploadFile("meeting-files", pdf, `${title}.pdf`);
         filesKeys.push(pdfStorage.key);
       }
 
       for (const [index, photo] of photos.entries()) {
-        const photoStorage = await uploadFile("gallery", {
-          reqFile: photo,
-          rename: `${title} - foto ${index}.jpg`,
-        });
+        const photoStorage = await uploadFile(
+          "gallery",
+          photo,
+          `${title} - foto ${index}.jpg`,
+        );
         photosStorage.push(photoStorage);
         filesKeys.push(photoStorage.key);
       }
@@ -119,6 +116,7 @@ const MeetingService = {
    * Busca os meetings registrados
    */
   async getMeetings(
+    search?: string,
     page: number = 1,
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
@@ -145,8 +143,18 @@ const MeetingService = {
           },
           tags: true,
         },
+        where: {
+          title: search?.length
+            ? {
+                ilike: `%${search}%`,
+              }
+            : EmptyFilter,
+        },
         limit: pageSize,
         offset: (page - 1) * pageSize,
+        orderBy: {
+          date: "desc",
+        },
       })
       .prepare("get_meetings")
       .execute();

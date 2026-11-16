@@ -1,7 +1,13 @@
-import multer from "multer";
 import z, { AnyZodObject } from "zod/v3";
 import { RequestErrorTypes } from "./consts";
 import type { Context, Next } from "hono";
+import type { ReqFile } from "@/types/file";
+
+declare module "hono" {
+  interface ContextVariableMap {
+    uploadedFiles: Record<string, ReqFile[]>;
+  }
+}
 
 /*
  * Formato de request tipado
@@ -134,17 +140,85 @@ export function validate(schema: AnyZodObject) {
   };
 }
 
-/*
- * Multer, usado para validar envio de arquivos
- */
-export const multerUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 },
-});
+const maxFileSize = 100 * 1024 * 1024;
 
 /*
- * Validador de arquivos do multer
+ * Middleware multipart compatível com Hono, que prepara arquivos no formato
+ * esperado pelos serviços de upload.
  */
+export const multerUpload = {
+  fields(fields: { name: string; maxCount?: number }[]) {
+    const allowedFields = new Map(fields.map((field) => [field.name, field]));
+
+    return async (c: Context, next: Next) => {
+      const body = await c.req.parseBody({ all: true });
+      const uploadedFiles: Record<string, ReqFile[]> = Object.fromEntries(
+        fields.map(({ name }) => [name, []]),
+      );
+
+      for (const [fieldname, value] of Object.entries(body)) {
+        const values = Array.isArray(value) ? value : [value];
+        const files = values.filter(
+          (entry): entry is File =>
+            typeof entry !== "string" && entry.name !== "",
+        );
+
+        if (files.length === 0) {
+          continue;
+        }
+
+        const field = allowedFields.get(fieldname);
+        if (!field) {
+          return c.json(
+            new JamResponse({
+              field: fieldname,
+              message: `Campo de arquivo não permitido: ${fieldname}`,
+            }),
+            400,
+          );
+        }
+
+        if (
+          field.maxCount !== undefined &&
+          uploadedFiles[fieldname].length + files.length > field.maxCount
+        ) {
+          return c.json(
+            new JamResponse({
+              field: fieldname,
+              message: `Número máximo de arquivos excedido: ${fieldname}`,
+            }),
+            400,
+          );
+        }
+
+        for (const file of files) {
+          if (file.size > maxFileSize) {
+            return c.json(
+              new JamResponse({
+                field: fieldname,
+                message: "O arquivo excede o limite de 100 MB",
+              }),
+              413,
+            );
+          }
+
+          uploadedFiles[fieldname].push({
+            fieldname,
+            originalname: file.name,
+            encoding: "7bit",
+            mimetype: file.type,
+            buffer: new Uint8Array(await file.arrayBuffer()),
+            size: file.size,
+          });
+        }
+      }
+
+      c.set("uploadedFiles", uploadedFiles);
+      await next();
+    };
+  },
+};
+
 export const fileValidationSchema = z.object({
   fieldname: z.string(),
   originalname: z.string(),

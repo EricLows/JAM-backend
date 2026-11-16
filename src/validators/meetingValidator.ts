@@ -4,20 +4,19 @@ import { z } from "zod/v3";
 export const MeetingValidator = {
   postMeeting: z.object({
     body: z.object({
-      title: z.string().min(1, 'Forneça um título' ),
-      description: z.string().min(1, 'Forneça uma descrição'),
-      responsible: z.string().min(1, 'Informe o apresentador'),
+      title: z.string().min(1, "Forneça um título"),
+      description: z.string().min(1, "Forneça uma descrição"),
+      responsible: z.string().min(1, "Informe o apresentador"),
       date: z.coerce.date({
-        errorMap: () => ({ message: 'Informe a data' })
+        errorMap: () => ({ message: "Informe a data" }),
       }),
-      tags: z.array(
-        z.coerce.number(),
-      ).optional(),
+      tags: z.array(z.coerce.number()).optional(),
     }),
   }),
 
   getMeetings: z.object({
     query: z.strictObject({
+      search: z.string().optional(),
       page: z.coerce
         .number({
           errorMap: zodErrorMap,
@@ -30,15 +29,14 @@ export const MeetingValidator = {
         })
         .optional()
         .default(50),
-    })
+    }),
   }),
 
   getMeeting: z.object({
     params: z.strictObject({
-      id: z.coerce
-        .number({
-          errorMap: zodErrorMap,
-        }),
-      })
-  })
+      id: z.coerce.number({
+        errorMap: zodErrorMap,
+      }),
+    }),
+  }),
 };
