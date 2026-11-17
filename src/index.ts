@@ -9,7 +9,8 @@ import { relations, setCypherKey } from "./db/schema";
 import loginRouter from "./routes/loginRoutes";
 import logRouter from "./routes/logRoutes";
 import suggestionRouter from "./routes/suggestionRoutes";
-import meetingRouter from "./routes/meetingRoutes.";
+import meetingRouter from "./routes/meetingRoutes";
+import galleryRouter from "./routes/galleryRoutes";
 import tagRouter from "./routes/tagRoutes";
 import postgres from "postgres";
 import { serve } from "@hono/node-server";
@@ -65,6 +66,7 @@ app.use(
 );
 
 app.route("/meeting", meetingRouter);
+app.route("/gallery", galleryRouter);
 app.route("/suggestion", suggestionRouter);
 app.route("/login", loginRouter);
 app.route("/log", logRouter);
