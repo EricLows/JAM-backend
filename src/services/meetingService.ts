@@ -31,18 +31,6 @@ const MeetingService = {
     const filesKeys: string[] = [];
 
     try {
-
-      console.dir({
-        date,
-        description,
-        responsible,
-        title,
-        pdf,
-        coverPhoto,
-        photos,
-        tags,
-      }, {depth: null});
-
       console.log("Vamos começar");
       
       let pdfStorage: FileStorage | undefined;
