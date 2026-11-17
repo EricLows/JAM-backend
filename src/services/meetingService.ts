@@ -31,6 +31,20 @@ const MeetingService = {
     const filesKeys: string[] = [];
 
     try {
+
+      console.dir({
+        date,
+        description,
+        responsible,
+        title,
+        pdf,
+        coverPhoto,
+        photos,
+        tags,
+      }, {depth: null});
+
+      console.log("Vamos começar");
+      
       let pdfStorage: FileStorage | undefined;
       const photosStorage: FileStorage[] = [];
 
@@ -41,11 +55,15 @@ const MeetingService = {
       );
       filesKeys.push(coverPhotoStorage.key);
 
+      console.log("Subimos o arquivo coverPhoto");
       if (pdf) {
+        console.log("Vamos subir o PDF");
         pdfStorage = await uploadFile("meeting-files", pdf, `${title}.pdf`);
         filesKeys.push(pdfStorage.key);
+        console.log("PDF foi");
       }
 
+      console.log("Vamos Subir as fotos");
       for (const [index, photo] of photos.entries()) {
         const photoStorage = await uploadFile(
           "gallery",
@@ -55,8 +73,10 @@ const MeetingService = {
         photosStorage.push(photoStorage);
         filesKeys.push(photoStorage.key);
       }
+      console.log("Fotos foi");
 
       const db = createDb(process.env.DB_CONNECTION);
+      console.log("Inserindo no banco de dados");
       const result = await db.transaction(async (tx) => {
         const [meeting] = await tx
           .insert(meetingTable)
@@ -72,6 +92,7 @@ const MeetingService = {
           .prepare("create_meeting")
           .execute();
 
+          console.log("Meeting foi");
         if (tags.length > 0) {
           await tx
             .insert(tagToMeeting)
@@ -85,6 +106,7 @@ const MeetingService = {
             .execute();
         }
 
+        console.log("Tags foi");
         if (photosStorage.length > 0) {
           await tx
             .insert(photoTable)
@@ -103,6 +125,7 @@ const MeetingService = {
         return meeting;
       });
 
+      console.log("Foi tudo");
       return result.id;
     } catch (e) {
       for (const key of filesKeys) {
