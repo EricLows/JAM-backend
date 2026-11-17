@@ -34,11 +34,8 @@ export type FileStorage = {
  * Salva um arquivo no storage
  */
 export async function uploadFile(repository: string, file: File, fileName: string): Promise<FileStorage> {
-  console.log("  Pegando o conteúdo");
   const contentType = file.type;
-  console.log("  Pegando a key");
   const key = `${repository}/${randomUUID()}-${fileName}`;
-  console.log(`  Key é ${key} e conteúdo é ${contentType}`);
 
   if (!process.env.R2_PUBLIC_URL) {
     throw "Sem URl de acesso público de arquivos!";
@@ -47,10 +44,8 @@ export async function uploadFile(repository: string, file: File, fileName: strin
   // TODO - compressão de imagem
 
   const fileUrl = getFileUrl(key);
-  console.log("  Vamos pegar o body");
   const body = new Uint8Array(await file.arrayBuffer());
 
-  console.log("  Enviando o arquivo");
   await storage.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -60,7 +55,6 @@ export async function uploadFile(repository: string, file: File, fileName: strin
     }),
   );
 
-  console.log("  Retornando");
   return {
     key,
     fileName,
@@ -73,7 +67,6 @@ export function getFileUrl(key: string) {
     throw "Sem URl de acesso público de arquivos!";
   }
 
-  console.log("  Buscando URL");
   const fileUrl = `${process.env.R2_PUBLIC_URL.replace(/\/$/, "")}/${key
     .split("/")
     .map(encodeURIComponent)

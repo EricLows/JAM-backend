@@ -22,8 +22,6 @@ class MeetingController {
       const photos: File[] = [];
       let pdf: File | undefined;
 
-      console.dir(formData, { depth: null });
-
       for (const [key, value] of formData.entries()) {
         switch (key) {
           case "tags[]":
