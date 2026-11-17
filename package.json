@@ -7,8 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "NODE_ENV=dev tsx --watch src/index.ts",
-    "wrangler-start":"npx wrangler dev",
-    "wrangler-deploy":"npx wrangler deploy",
+    "wrangler-start": "npx wrangler dev",
+    "wrangler-deploy": "npx wrangler deploy",
     "postgres-install": "sudo docker pull postgres && sudo docker tag postgres:latest jam-postgres:latest && sudo docker rmi postgres:latest",
     "postgres-volume": "sudo docker volume create jam_volume",
     "postgres-run": "sudo docker run --name jam-postgres -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=ocKDxaQYmXdd6g_8SRBOe4E4 -e POSTGRES_DB=jam-database -p 5005:5432 -v jam_volume:/var/lib/postgresql -d jam-postgres",
@@ -32,6 +32,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1165.0",
     "@aws-sdk/s3-request-presigner": "^3.1165.0",
+    "@aws-sdk/xml-builder": "^3.972.43",
     "@hono/node-server": "^2.1.8",
     "crypto-ts": "^1.0.2",
     "dotenv": "^17.4.2",
