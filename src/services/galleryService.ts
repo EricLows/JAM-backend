@@ -19,6 +19,7 @@ const GalleryService = {
           id: true,
           link: true,
           name: true,
+          date: true,
         },
         where: {
           name: search?.length
@@ -45,6 +46,7 @@ const GalleryService = {
         id: photo.id,
         link: getFileUrl(photo.link),
         name: photo.name,
+        date: photo.date ?? new Date(),
       }),
     );
   },

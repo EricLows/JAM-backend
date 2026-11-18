@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
 import { usersTable, tagTable } from "./schema";
-import { db } from "..";
+import { createDb } from "./db";
 
 export async function seed() {
   console.log("Iniciando seed");
 
+  const db = createDb(process.env.DB_CONNECTION);
   const username = process.env.DEFAULT_ACCOUNT_NAME ?? "JAM admin";
   const email = process.env.DEFAULT_ACCOUNT_EMAIL ?? "jam.10.scb@gmail.com";
   const password = process.env.DEFAULT_ACCOUNT_PASSWORD ?? "123456789";

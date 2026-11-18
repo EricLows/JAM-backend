@@ -137,8 +137,6 @@ const MeetingService = {
           photos: {
             columns: {
               id: true,
-              link: true,
-              name: true,
             },
           },
           tags: true,
@@ -201,6 +199,7 @@ const MeetingService = {
               id: true,
               link: true,
               name: true,
+              date: true,
             },
           },
           tags: true,
