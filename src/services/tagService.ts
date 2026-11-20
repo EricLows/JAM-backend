@@ -8,7 +8,7 @@ const TagService = {
    * Registra uma tag
    */
   async postTag({ name }): Promise<number> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const [result] = await db
       .insert(tagTable)
       .values({
@@ -18,6 +18,7 @@ const TagService = {
       .prepare("post_tag")
       .execute();
 
+    await client.close();
     return result.id;
   },
 
@@ -25,13 +26,15 @@ const TagService = {
    * Busca as tags registradas
    */
   async getTags(): Promise<Tag[]> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const results = await db
       .select()
       .from(tagTable)
       .orderBy(asc(tagTable.id))
       .prepare("get_tags")
       .execute();
+      
+    await client.close();
     return results;
   },
 };

@@ -1,7 +1,8 @@
 import type { Context } from "hono";
 import { MeetingService } from "@/services/meetingService";
-import { ControllerResponse, JamResponse } from "@/lib/validator";
+import { ControllerResponse, JamResponse, TypedRequest } from "@/lib/validator";
 import { Meeting } from "@/types/meeting";
+import { MeetingValidator } from "@/validators/meetingValidator";
 
 class MeetingController {
   /*
@@ -73,11 +74,14 @@ class MeetingController {
    */
   async getMeetings(c: Context): Promise<Response> {
     try {
-      const { search, page, pageSize } = c.req.query();
+      const { page, pageSize, search, minDate, maxDate, tags } = c.req.query();
 
       process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
       const meetings = await MeetingService.getMeetings(
         search,
+        minDate ? new Date(minDate) : undefined,
+        maxDate ? new Date(maxDate) : undefined,
+        tags?.length ? tags.split(",").map((t) => Number(t)) : undefined,
         Number(page),
         Number(pageSize),
       );

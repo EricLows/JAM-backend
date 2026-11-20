@@ -30,7 +30,7 @@ const MeetingService = {
   }): Promise<number> {
     const filesKeys: string[] = [];
 
-    try {    
+    try {
       let pdfStorage: FileStorage | undefined;
       const photosStorage: FileStorage[] = [];
 
@@ -56,7 +56,7 @@ const MeetingService = {
         filesKeys.push(photoStorage.key);
       }
 
-      const db = createDb(process.env.DB_CONNECTION);
+      const [db, client] = createDb(process.env.DB_CONNECTION, true);
       const result = await db.transaction(async (tx) => {
         const [meeting] = await tx
           .insert(meetingTable)
@@ -100,6 +100,7 @@ const MeetingService = {
             .execute();
         }
 
+        await client.close();
         return meeting;
       });
 
@@ -117,10 +118,13 @@ const MeetingService = {
    */
   async getMeetings(
     search?: string,
+    minDate?: Date,
+    maxDate?: Date,
+    tags?: number[],
     page: number = 1,
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const meetings = await db.query.meetingTable
       .findMany({
         columns: {
@@ -142,9 +146,29 @@ const MeetingService = {
           tags: true,
         },
         where: {
-          title: search?.length
+          OR: search?.length
+            ? [
+                {
+                  title: {
+                    ilike: `%${search}%`,
+                  },
+                },
+                {
+                  responsible: {
+                    ilike: `%${search}%`,
+                  },
+                },
+              ]
+            : EmptyFilter,
+          date: {
+            gte: minDate ? minDate : EmptyFilter,
+            lte: maxDate ? maxDate : EmptyFilter,
+          },
+          tags: tags?.length
             ? {
-                ilike: `%${search}%`,
+                id: {
+                  in: tags,
+                },
               }
             : EmptyFilter,
         },
@@ -157,6 +181,7 @@ const MeetingService = {
       .prepare("get_meetings")
       .execute();
 
+    await client.close();
     if (meetings.length === 0) {
       return [];
     }
@@ -180,7 +205,7 @@ const MeetingService = {
    * Busca um determinado encontro
    */
   async getMeeting(id: number): Promise<Meeting | undefined> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const meeting = await db.query.meetingTable
       .findFirst({
         columns: {
@@ -211,6 +236,7 @@ const MeetingService = {
       .prepare("get_meeting")
       .execute();
 
+    await client.close();
     if (!meeting) return undefined;
 
     return {

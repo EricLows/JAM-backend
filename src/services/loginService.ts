@@ -8,7 +8,7 @@ const LoginService = {
    * Acessa uma conta, caso ela exista
    */
   async login(email: string, password: string): Promise<User> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const loginQuery = db
       .select()
       .from(usersTable)
@@ -17,6 +17,7 @@ const LoginService = {
       .prepare("login");
     const [result] = await loginQuery.execute({ email });
 
+    await client.close();
     if (!result) {
       throw new JamError(403, "E-mail não existe", "email");
     }
@@ -32,7 +33,7 @@ const LoginService = {
    * Verifica se existe um determinado e-mail cadastrado
    */
   async emailExists(email: string): Promise<boolean> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const result = await db
       .select()
       .from(usersTable)
@@ -40,6 +41,7 @@ const LoginService = {
       .prepare("email_exists")
       .execute();
 
+    await client.close();
     return result.length > 0;
   },
 
@@ -57,7 +59,7 @@ const LoginService = {
       throw new JamError(403, "E-mail já existe", "email");
     }
 
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const [result] = await db
       .insert(usersTable)
       .values({
@@ -70,6 +72,7 @@ const LoginService = {
       .prepare("register")
       .execute();
 
+    await client.close();
     return result[0].id;
   },
 };

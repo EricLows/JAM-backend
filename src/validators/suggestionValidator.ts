@@ -7,7 +7,7 @@ export const SuggestionValidator = {
       name: z.string().optional(),
       message: z.string({
         errorMap: () => ({ message: 'Escreva uma sugestão' })
-      }),
+      }).min(1),
     }),
   }),
 

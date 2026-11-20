@@ -12,7 +12,7 @@ const GalleryService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<Photo[]> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const gallery = await db.query.photoTable
       .findMany({
         columns: {
@@ -37,6 +37,7 @@ const GalleryService = {
       .prepare("get_gallerys")
       .execute();
 
+    await client.close();
     if (gallery.length === 0) {
       return [];
     }

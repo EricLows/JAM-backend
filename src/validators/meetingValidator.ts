@@ -16,7 +16,6 @@ export const MeetingValidator = {
 
   getMeetings: z.object({
     query: z.strictObject({
-      search: z.string().optional(),
       page: z.coerce
         .number({
           errorMap: zodErrorMap,
@@ -29,6 +28,10 @@ export const MeetingValidator = {
         })
         .optional()
         .default(50),
+      search: z.string().optional(),
+      minDate: z.coerce.date().optional(),
+      maxDate: z.coerce.date().optional(),
+      tags: z.string().optional(),
     }),
   }),
 

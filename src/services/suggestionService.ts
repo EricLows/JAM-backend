@@ -8,7 +8,7 @@ const SuggestionService = {
    * Registra um suggestion
    */
   async postSuggestion(message: string, name?: string): Promise<number> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const [result] = await db
       .insert(suggestionTable)
       .values({
@@ -19,6 +19,7 @@ const SuggestionService = {
       .prepare("post_suggestion")
       .execute();
 
+    await client.close();
     return result.id;
   },
 
@@ -29,7 +30,7 @@ const SuggestionService = {
     page: number = 1,
     pageSize: number = 50,
   ): Promise<Suggestion[]> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const results = await db
       .select()
       .from(suggestionTable)
@@ -38,6 +39,8 @@ const SuggestionService = {
       .offset((page - 1) * pageSize)
       .prepare("get_suggestions")
       .execute();
+
+    await client.close();
     return results;
   },
 };

@@ -8,7 +8,7 @@ const LogService = {
    * Registra um log
    */
   async log(logType: string, message: string): Promise<number> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const [result] = await db
       .insert(logsTable)
       .values({
@@ -19,6 +19,7 @@ const LogService = {
       .prepare("log")
       .execute();
 
+    await client.close();
     return result.id;
   },
 
@@ -26,7 +27,7 @@ const LogService = {
    * Busca os logs registrados
    */
   async getLogs(page: number = 1, pageSize: number = 50): Promise<Log[]> {
-    const db = createDb(process.env.DB_CONNECTION);
+    const [db, client] = createDb(process.env.DB_CONNECTION, true);
     const results = await db
       .select()
       .from(logsTable)
@@ -35,6 +36,8 @@ const LogService = {
       .offset((page - 1) * pageSize)
       .prepare("get_logs")
       .execute();
+
+    await client.close();
     return results;
   },
 };
