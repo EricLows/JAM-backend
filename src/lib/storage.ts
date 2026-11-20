@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import "dotenv/config";
+import { JamLog } from "./error";
 
 const DEFAULT_IMAGE_WIDTH = 1600;
 const DEFAULT_IMAGE_HEIGHT = 900;
@@ -33,9 +34,17 @@ export type FileStorage = {
 /*
  * Salva um arquivo no storage
  */
-export async function uploadFile(repository: string, file: File, fileName: string): Promise<FileStorage> {
+export async function uploadFile(
+  repository: string,
+  file: File,
+  fileName: string,
+): Promise<FileStorage> {
+  JamLog("  Obtendo dados e gerando chave");
+
   const contentType = file.type;
   const key = `${repository}/${randomUUID()}-${fileName}`;
+
+  JamLog("  Dados obtidos");
 
   if (!process.env.R2_PUBLIC_URL) {
     throw "Sem URl de acesso público de arquivos!";
@@ -43,9 +52,11 @@ export async function uploadFile(repository: string, file: File, fileName: strin
 
   // TODO - compressão de imagem
 
+  JamLog("  Obtendo URL");
   const fileUrl = getFileUrl(key);
+  JamLog("  URL obtida, obtendo array de bytes");
   const body = new Uint8Array(await file.arrayBuffer());
-
+  JamLog("  Array obtido, subindo imagem");
   await storage.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -55,6 +66,7 @@ export async function uploadFile(repository: string, file: File, fileName: strin
     }),
   );
 
+  JamLog("  Imagem subiu com sucesso, retornando");
   return {
     key,
     fileName,
@@ -72,7 +84,7 @@ export function getFileUrl(key: string) {
     .map(encodeURIComponent)
     .join("/")}`;
 
-    return fileUrl;
+  return fileUrl;
 }
 
 /*

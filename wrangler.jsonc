@@ -16,6 +16,7 @@
 		"DEFAULT_ACCOUNT_EMAIL": "jam.10.scb@gmail.com",
 		"DEFAULT_ACCOUNT_NAME": "JAM admin",
 		"R2_BUCKET":"jam-files",
+		"DEBUG": true,
 	},
 	"hyperdrive": [
 		{

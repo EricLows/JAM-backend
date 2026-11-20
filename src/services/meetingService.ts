@@ -4,6 +4,7 @@ import { ReqFile } from "@/types/file";
 import { deleteFile, FileStorage, getFileUrl, uploadFile } from "@/lib/storage";
 import { createDb } from "../db/db";
 import { EmptyFilter } from "drizzle-orm";
+import { JamLog } from "../lib/error";
 
 const MeetingService = {
   /*
@@ -34,6 +35,8 @@ const MeetingService = {
       let pdfStorage: FileStorage | undefined;
       const photosStorage: FileStorage[] = [];
 
+      JamLog("Subindo imagem 'coverPhoto'");
+
       const coverPhotoStorage: FileStorage = await uploadFile(
         "meeting-cover-photo",
         coverPhoto,
@@ -41,11 +44,16 @@ const MeetingService = {
       );
       filesKeys.push(coverPhotoStorage.key);
 
+      JamLog("'coverPhoto' postada");
+
       if (pdf) {
+        JamLog("Subindo arquivo 'pdf'");
         pdfStorage = await uploadFile("meeting-files", pdf, `${title}.pdf`);
         filesKeys.push(pdfStorage.key);
+        JamLog("'pdf' postado");
       }
 
+      JamLog("Subindo fotos'");
       for (const [index, photo] of photos.entries()) {
         const photoStorage = await uploadFile(
           "gallery",
@@ -55,9 +63,12 @@ const MeetingService = {
         photosStorage.push(photoStorage);
         filesKeys.push(photoStorage.key);
       }
+      JamLog("Fotos postadas");
 
       const [db, client] = createDb(process.env.DB_CONNECTION, true);
       const result = await db.transaction(async (tx) => {
+        JamLog("Criando encontro no banco de dados");
+
         const [meeting] = await tx
           .insert(meetingTable)
           .values({
@@ -72,7 +83,11 @@ const MeetingService = {
           .prepare("create_meeting")
           .execute();
 
+        JamLog("Encontro criado");
+
         if (tags.length > 0) {
+          JamLog("Criando tags");
+
           await tx
             .insert(tagToMeeting)
             .values(
@@ -83,9 +98,13 @@ const MeetingService = {
             )
             .prepare("set_meeting_tags")
             .execute();
+
+          JamLog("Tags criadas");
         }
 
         if (photosStorage.length > 0) {
+          JamLog("Inserindo fotos no banco de dados");
+
           await tx
             .insert(photoTable)
             .values(
@@ -98,12 +117,15 @@ const MeetingService = {
             )
             .prepare("create_meeting_photos")
             .execute();
+
+          JamLog("Fotos inseridas");
         }
 
         await client.close();
         return meeting;
       });
 
+      JamLog("Encerrando função");
       return result.id;
     } catch (e) {
       for (const key of filesKeys) {
