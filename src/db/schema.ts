@@ -127,16 +127,37 @@ export const tagToMeeting = pgTable(
   ],
 );
 
+export const tagToPhoto = pgTable(
+  "tagToPhoto",
+  {
+    photoId: integer()
+      .notNull()
+      .references(() => photoTable.id),
+    tagId: integer()
+      .notNull()
+      .references(() => tagTable.id),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.photoId, t.tagId],
+    }),
+  ],
+);
+
 /*
  * Relações
  */
 export const relations = defineRelations(
-  { meetingTable, photoTable, tagTable, tagToMeeting },
+  { meetingTable, photoTable, tagTable, tagToMeeting, tagToPhoto },
   (r) => ({
     photoTable: {
       meeting: r.one.meetingTable({
         from: r.photoTable.meetingId,
         to: r.meetingTable.id,
+      }),
+      tags: r.many.tagTable({
+        from: r.photoTable.id.through(r.tagToPhoto.photoId),
+        to: r.tagTable.id.through(r.tagToPhoto.tagId),
       }),
     },
     meetingTable: {
@@ -148,6 +169,7 @@ export const relations = defineRelations(
     },
     tagTable: {
       meetings: r.many.meetingTable(),
+      photo: r.many.photoTable(),
     },
   }),
 );

@@ -149,6 +149,7 @@ const MeetingService = {
     pageSize: number = 50,
   ): Promise<MeetingSimple[]> {
     const [db, client] = createDb(process.env.DB_CONNECTION, true);
+    console.log("DB conectado!");
     const meetings = await db.query.meetingTable
       .findMany({
         columns: {
