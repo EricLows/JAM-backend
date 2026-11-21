@@ -121,11 +121,13 @@ const MeetingService = {
           JamLog("Fotos inseridas");
         }
 
-        await client.close();
+
         return meeting;
       });
 
       JamLog("Encerrando função");
+
+      await client.close();
       return result.id;
     } catch (e) {
       for (const key of filesKeys) {

@@ -16,20 +16,17 @@ class MeetingController {
       const description = formData.get("description") as string;
       const responsible = formData.get("responsible") as string;
       const title = formData.get("title") as string;
+      const tags: number[] = (formData.get("tags") as string)
+        .split(",")
+        .map((s) => Number(s));
 
       const coverPhoto = formData.get("coverPhoto") as File;
 
-      const tags: number[] = [];
       const photos: File[] = [];
       let pdf: File | undefined;
 
       for (const [key, value] of formData.entries()) {
         switch (key) {
-          case "tags[]":
-          case "tags":
-            tags.push(Number(value));
-            break;
-
           case "photos[]":
           case "photos":
             photos.push(value as File);
