@@ -121,7 +121,6 @@ const MeetingService = {
           JamLog("Fotos inseridas");
         }
 
-
         return meeting;
       });
 
@@ -166,6 +165,9 @@ const MeetingService = {
           photos: {
             columns: {
               id: true,
+            },
+            with: {
+              tags: true,
             },
           },
           tags: true,
@@ -251,6 +253,9 @@ const MeetingService = {
               name: true,
               date: true,
             },
+            with: {
+              tags: true,
+            },
           },
           tags: true,
         },
@@ -274,6 +279,7 @@ const MeetingService = {
       pdf: meeting.pdf ? getFileUrl(meeting.pdf) : null,
       photos: meeting.photos.map((photo) => ({
         ...photo,
+        date: photo.date ?? new Date(),
         link: getFileUrl(photo.link),
       })),
       tags: meeting.tags,

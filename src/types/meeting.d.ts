@@ -1,3 +1,5 @@
+import { type Photo } from './photo';
+
 export type MeetingSimple = {
   id: number,
   title: string,
@@ -22,11 +24,7 @@ export type Meeting = {
   date: Date | null,
   pdf: string | null,
   likes: number,
-  photos: {
-    id: number,
-    link: string,
-    name: string,
-  }[],
+  photos: Photo[],
   tags: {
     id: number,
     name: string,

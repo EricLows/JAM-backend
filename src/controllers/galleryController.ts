@@ -12,7 +12,7 @@ class GalleryController {
       const { search, page, pageSize } = c.req.query();
 
       process.env.DB_CONNECTION = c.env.HYPERDRIVE?.connectionString;
-      const gallerys = await GalleryService.getGallery(
+      const gallery = await GalleryService.getGallery(
         search,
         Number(page),
         Number(pageSize),
@@ -20,7 +20,7 @@ class GalleryController {
 
       return c.json(
         new JamResponse({
-          data: gallerys,
+          data: gallery,
         }),
         200,
       );
