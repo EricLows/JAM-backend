@@ -145,10 +145,29 @@ export const tagToPhoto = pgTable(
 );
 
 /*
+ * Foto do Jaime
+ */
+
+export const jaimePhotoTable = pgTable("jaimePhoto", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  link: text().notNull(),
+});
+
+/*
+ * Vídeo do Jaime
+ */
+
+export const jaimeVideoTable = pgTable("jaimeVideo", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: text().notNull(),
+  link: text().notNull(),
+});
+
+/*
  * Relações
  */
 export const relations = defineRelations(
-  { meetingTable, photoTable, tagTable, tagToMeeting, tagToPhoto },
+  { meetingTable, photoTable, tagTable, tagToMeeting, tagToPhoto, jaimePhotoTable, jaimeVideoTable },
   (r) => ({
     photoTable: {
       meeting: r.one.meetingTable({

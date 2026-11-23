@@ -14,6 +14,7 @@ import galleryRouter from "./routes/galleryRoutes";
 import tagRouter from "./routes/tagRoutes";
 import postgres from "postgres";
 import { serve } from "@hono/node-server";
+import jaimeRouter from "./routes/jaimeRoutes";
 
 let port: number | undefined;
 
@@ -71,6 +72,7 @@ app.route("/suggestion", suggestionRouter);
 app.route("/login", loginRouter);
 app.route("/log", logRouter);
 app.route("/tag", tagRouter);
+app.route("/jaime", jaimeRouter);
 
 app.onError((err, c) => handleError(err as any, c));
 
